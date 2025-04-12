@@ -10,7 +10,10 @@ export function App() {
   return (
     <div className="relative">
       <div className="fixed top-4 left-4 z-50">
-        <StationSelector onStationSelect={setSelectedStation} />
+        <StationSelector 
+          onStationSelect={setSelectedStation} 
+          selectedStation={selectedStation}
+        />
       </div>
       <div className="max-w-7xl mx-auto p-8 text-center">
         {/* positive x -> left, positive y -> up */}

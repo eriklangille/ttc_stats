@@ -318,6 +318,9 @@ const Map = ({
 }: MapProps) => {
   const [adjustedTranslateX, setAdjustedTranslateX] = useState(translateX);
   const [adjustedTranslateY, setAdjustedTranslateY] = useState(translateY);
+  const [cardPosition, setCardPosition] = useState<{ x: number; y: number } | null>(null);
+  const [selectedLineColor, setSelectedLineColor] = useState<string>('');
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const lineElements = useMemo(() => 
     Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
@@ -352,18 +355,19 @@ const Map = ({
         <g key={`${lineName}-stations`}>
           {LINES[lineName as LineName].stations.map((station, index) => {
             const position = getPointAtDistance(points, station.distance)
+            const isSelected = selectedStation?.name === station.name
             return (
               <g 
                 key={`${lineName}-station-${index}`} 
                 style={{ zIndex: 3 }}
-                onClick={() => {}}
+                onClick={() => onStationSelect(station)}
                 className="cursor-pointer"
               >
                 <circle
                   cx={position.x}
                   cy={position.y}
-                  r={strokeWidth / 1}
-                  fill="white"
+                  r={isSelected ? strokeWidth * 1.2 : strokeWidth / 1}
+                  fill={isSelected ? color : "white"}
                   style={{ zIndex: 3 }}
                   stroke={color}
                   strokeWidth={strokeWidth / 1.5}
@@ -374,7 +378,7 @@ const Map = ({
           })}
         </g>
       )
-    }), [strokeWidth]
+    }), [strokeWidth, selectedStation, onStationSelect]
   )
 
   const trainElements = useMemo(() => [
@@ -389,44 +393,96 @@ const Map = ({
     <Train key="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
   ], [])
 
+  // Add connection line when station is selected
+  const connectionLine = useMemo(() => {
+    if (!selectedStation || !cardPosition) return null;
+
+    let stationPosition: Point | null = null;
+    let lineColor = '';
+
+    // Find the station position and line color
+    for (const [lineName, line] of Object.entries(LINES)) {
+      const station = line.stations.find(s => s.name === selectedStation.name);
+      if (station) {
+        const points = getAbsolutePoints(line.start, line.line);
+        stationPosition = getPointAtDistance(points, station.distance);
+        lineColor = line.color;
+        break;
+      }
+    }
+
+    if (!stationPosition) return null;
+
+    // Calculate the scaled position
+    const scaledX = stationPosition.x;
+    const scaledY = stationPosition.y;
+
+    return (
+      <line
+        x1={scaledX}
+        y1={scaledY}
+        x2={cardPosition.x}
+        y2={cardPosition.y / 3}
+        stroke={lineColor}
+        strokeWidth={2}
+        strokeDasharray="5,5"
+        style={{ zIndex: 1 }}
+      />
+    );
+  }, [selectedStation, cardPosition, scale]);
+
   useEffect(() => {
     if (selectedStation) {
       // Find the line and station position
       let stationPosition: Point | null = null;
+      let lineColor = '';
+
       for (const [lineName, line] of Object.entries(LINES)) {
         const station = line.stations.find(s => s.name === selectedStation.name);
         if (station) {
           const points = getAbsolutePoints(line.start, line.line);
           stationPosition = getPointAtDistance(points, station.distance);
+          lineColor = line.color;
           break;
         }
       }
 
       if (stationPosition) {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
         const midX = sizeX / 2;
         const midY = sizeY / 2;
 
         const offsetX = stationPosition.x - midX;
         const offsetY = stationPosition.y - midY;
 
-        const viewportCenterX = viewportWidth / 2;
-        const viewportCenterY = viewportHeight / 2;
-
         const newTranslateX = -offsetX * scale;
         const newTranslateY = -offsetY * scale;
 
-        console.log(newTranslateX, newTranslateY)
-
+        setIsAnimating(true);
         setAdjustedTranslateX(newTranslateX);
         setAdjustedTranslateY(newTranslateY);
+
+        // Calculate card position
+        const scaledX = stationPosition.x + newTranslateX;
+        const scaledY = stationPosition.y + newTranslateY;
+        setCardPosition({ x: scaledX, y: scaledY });
+        setSelectedLineColor(lineColor);
+
+        // Reset animation state after transition
+        setTimeout(() => {
+          setIsAnimating(false);
+        }, 500);
       }
     } else {
-      // Reset to default translation when no station is selected
+      setIsAnimating(true);
       setAdjustedTranslateX(translateX);
       setAdjustedTranslateY(translateY);
+      setCardPosition(null);
+      setSelectedLineColor('');
+
+      // Reset animation state after transition
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 500);
     }
   }, [selectedStation, scale, translateX, translateY, sizeX, sizeY]);
 
@@ -439,17 +495,21 @@ const Map = ({
           position: 'fixed',
           top: 0,
           left: 0,
-          transform: `translate(${adjustedTranslateX}px, ${adjustedTranslateY}px) scale(${scale})`
+          transform: `translate(${adjustedTranslateX}px, ${adjustedTranslateY}px) scale(${scale})`,
+          transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none',
         }}
       >
         {lineElements}
         {trainElements}
         {stationElements}
+        {connectionLine}
       </svg>
-      {selectedStation && (
+      {selectedStation && cardPosition && (
         <StationCard 
           station={selectedStation} 
           onClose={() => onStationSelect(null)} 
+          lineColor={selectedLineColor}
+          position={cardPosition}
         />
       )}
     </>
