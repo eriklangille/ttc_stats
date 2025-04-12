@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
+import { StationCard } from './StationCard'
 
 // Types
 type Point = { x: number; y: number }
 type RelativePoint = { readonly dx: number; readonly dy: number }
-type Station = { distance: number; name: string }
+export type Station = { distance: number; name: string }
 type Line = {
   color: string
   start: Point
@@ -301,6 +302,8 @@ type MapProps = {
   strokeWidth?: number
   translateX?: number
   translateY?: number
+  selectedStation?: Station | null
+  onStationSelect: (station: Station | null) => void
 }
 
 const Map = ({
@@ -310,7 +313,12 @@ const Map = ({
   strokeWidth = 10,
   translateX = 0,
   translateY = 0,
+  selectedStation = null,
+  onStationSelect,
 }: MapProps) => {
+  const [adjustedTranslateX, setAdjustedTranslateX] = useState(translateX);
+  const [adjustedTranslateY, setAdjustedTranslateY] = useState(translateY);
+
   const lineElements = useMemo(() => 
     Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
       const points = getAbsolutePoints(start, relativePoints)
@@ -345,7 +353,12 @@ const Map = ({
           {LINES[lineName as LineName].stations.map((station, index) => {
             const position = getPointAtDistance(points, station.distance)
             return (
-              <g key={`${lineName}-station-${index}`} style={{ zIndex: 3 }}>
+              <g 
+                key={`${lineName}-station-${index}`} 
+                style={{ zIndex: 3 }}
+                onClick={() => {}}
+                className="cursor-pointer"
+              >
                 <circle
                   cx={position.x}
                   cy={position.y}
@@ -376,22 +389,73 @@ const Map = ({
     <Train key="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
   ], [])
 
+  useEffect(() => {
+    if (selectedStation) {
+      // Find the line and station position
+      let stationPosition: Point | null = null;
+      for (const [lineName, line] of Object.entries(LINES)) {
+        const station = line.stations.find(s => s.name === selectedStation.name);
+        if (station) {
+          const points = getAbsolutePoints(line.start, line.line);
+          stationPosition = getPointAtDistance(points, station.distance);
+          break;
+        }
+      }
+
+      if (stationPosition) {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        const midX = sizeX / 2;
+        const midY = sizeY / 2;
+
+        const offsetX = stationPosition.x - midX;
+        const offsetY = stationPosition.y - midY;
+
+        const viewportCenterX = viewportWidth / 2;
+        const viewportCenterY = viewportHeight / 2;
+
+        const newTranslateX = -offsetX * scale;
+        const newTranslateY = -offsetY * scale;
+
+        console.log(newTranslateX, newTranslateY)
+
+        setAdjustedTranslateX(newTranslateX);
+        setAdjustedTranslateY(newTranslateY);
+      }
+    } else {
+      // Reset to default translation when no station is selected
+      setAdjustedTranslateX(translateX);
+      setAdjustedTranslateY(translateY);
+    }
+  }, [selectedStation, scale, translateX, translateY, sizeX, sizeY]);
+
   return (
-    <svg 
-      width={sizeX} 
-      height={sizeY} 
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`
-      }}
-    >
-      {lineElements}
-      {trainElements}
-      {stationElements}
-    </svg>
+    <>
+      <svg 
+        width={sizeX} 
+        height={sizeY} 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          transform: `translate(${adjustedTranslateX}px, ${adjustedTranslateY}px) scale(${scale})`
+        }}
+      >
+        {lineElements}
+        {trainElements}
+        {stationElements}
+      </svg>
+      {selectedStation && (
+        <StationCard 
+          station={selectedStation} 
+          onClose={() => onStationSelect(null)} 
+        />
+      )}
+    </>
   )
 }
 
 export default Map
+
+export { LINES }
