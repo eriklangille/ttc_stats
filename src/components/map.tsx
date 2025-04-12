@@ -1,25 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
-const lines = {
+// Types
+type Point = { x: number; y: number }
+type RelativePoint = { readonly dx: number; readonly dy: number }
+type Station = { distance: number; name: string }
+type Line = {
+  color: string
+  start: Point
+  line: readonly RelativePoint[]
+  stations: readonly Station[]
+}
+
+// Constants
+const LINES = {
   "Bloor-Danforth": {
     color: "#00A859",
     start: { x: 250, y: 585 },
-    line: [{
-      dx: 25,
-      dy: -12,
-    }, {
-      dx: 725,
-      dy: 0,
-    }, {
-      dx: 30,
-      dy: -16,
-    }, {
-      dx: 56,
-      dy: -70,
-    }, {
-      dx: 50,
-      dy: -50,
-    }],
+    line: [
+      { dx: 25, dy: -12 },
+      { dx: 725, dy: 0 },
+      { dx: 30, dy: -16 },
+      { dx: 56, dy: -70 },
+      { dx: 50, dy: -50 }
+    ],
     stations: [
       { distance: 1, name: "Kipling" },
       { distance: 28, name: "Islington" },
@@ -51,46 +54,25 @@ const lines = {
       { distance: 751, name: "Main Street" },
       { distance: 788, name: "Victoria Park" },
       { distance: 875, name: "Warden" },
-      { distance: 1000, name: "Kennedy" },
-    ],
+      { distance: 1000, name: "Kennedy" }
+    ]
   },
   "Yonge-University": {
     color: "#FFCC29",
     start: { x: 718, y: 212 },
-    line: [{
-      dx: 0,
-      dy: 530,
-    }, {
-      dx: -54,
-      dy: 0,
-    }, {
-      dx: 0,
-      dy: -168,
-    }, {
-      dx: -28,
-      dy: -28,
-    }, {
-      dx: 0,
-      dy: -61,
-    }, {
-      dx: -55,
-      dy: -55,
-    }, {
-      dx: -27,
-      dy: -108,
-    }, {
-      dx: -28,
-      dy: -52,
-    },{
-      dx: -58,
-      dy: -29,
-    }, {
-      dx: -110,
-      dy: -110,
-    }, {
-      dx: 0,
-      dy: -30,
-    }],
+    line: [
+      { dx: 0, dy: 530 },
+      { dx: -54, dy: 0 },
+      { dx: 0, dy: -168 },
+      { dx: -28, dy: -28 },
+      { dx: 0, dy: -61 },
+      { dx: -55, dy: -55 },
+      { dx: -27, dy: -108 },
+      { dx: -28, dy: -52 },
+      { dx: -58, dy: -29 },
+      { dx: -110, dy: -110 },
+      { dx: 0, dy: -30 }
+    ],
     stations: [
       { distance: 1, name: "Finch" },
       { distance: 28, name: "North York Centre" },
@@ -129,32 +111,29 @@ const lines = {
       { distance: 1252, name: "York University" },
       { distance: 1292, name: "Pioneer Village" },
       { distance: 1322, name: "Highway 407" },
-      { distance: 1350, name: "Vaughan Metropolitan Centre" },
-    ],
+      { distance: 1350, name: "Vaughan Metropolitan Centre" }
+    ]
   },
   "Sheppard": {
     color: "#A8518A",
     start: { x: 717, y: 266 },
-    line: [{
-      dx: 225,
-      dy: 0,
-    }],
+    line: [
+      { dx: 225, dy: 0 }
+    ],
     stations: [
-      { distance: 1, name: "Sheppard-Yonge"},
-      { distance: 83, name: "Bayview"},
-      { distance: 125, name: "Bessarion"},
-      { distance: 168, name: "Leslie"},
-      { distance: 225, name: "Don Mills"},
+      { distance: 1, name: "Sheppard-Yonge" },
+      { distance: 83, name: "Bayview" },
+      { distance: 125, name: "Bessarion" },
+      { distance: 168, name: "Leslie" },
+      { distance: 225, name: "Don Mills" }
     ]
   }
 } as const
 
-type LineName = keyof typeof lines
-type Point = { x: number; y: number }
-type RelativePoint = { readonly dx: number; readonly dy: number }
-type Station = { distance: number; name: string }
+type LineName = keyof typeof LINES
 
-function getAbsolutePoints(start: Point, relativePoints: readonly RelativePoint[]): Point[] {
+// Utility functions
+const getAbsolutePoints = (start: Point, relativePoints: readonly RelativePoint[]): Point[] => {
   const points: Point[] = [start]
   let currentX = start.x
   let currentY = start.y
@@ -168,7 +147,7 @@ function getAbsolutePoints(start: Point, relativePoints: readonly RelativePoint[
   return points
 }
 
-function getPointAtDistance(points: Point[], targetDistance: number): Point {
+const getPointAtDistance = (points: Point[], targetDistance: number): Point => {
   let accumulatedDistance = 0
   
   for (let i = 0; i < points.length - 1; i++) {
@@ -177,7 +156,6 @@ function getPointAtDistance(points: Point[], targetDistance: number): Point {
     const segmentLength = Math.sqrt(dx * dx + dy * dy)
     
     if (accumulatedDistance + segmentLength >= targetDistance) {
-      // Calculate position within this segment
       const segmentDistance = targetDistance - accumulatedDistance
       const segmentPercent = segmentDistance / segmentLength
       return {
@@ -188,18 +166,33 @@ function getPointAtDistance(points: Point[], targetDistance: number): Point {
     accumulatedDistance += segmentLength
   }
 
-  // If we get here, return the last point
   return points[points.length - 1]
 }
 
+const getAngleAtDistance = (points: Point[], distance: number): number => {
+  let accumulatedDistance = 0
+  for (let i = 0; i < points.length - 1; i++) {
+    const dx = points[i + 1].x - points[i].x
+    const dy = points[i + 1].y - points[i].y
+    const segmentLength = Math.sqrt(dx * dx + dy * dy)
+    
+    if (accumulatedDistance + segmentLength >= distance) {
+      return Math.atan2(dy, dx) * (180 / Math.PI)
+    }
+    accumulatedDistance += segmentLength
+  }
+  return 0
+}
+
+// Components
 type TrainProps = {
-  line: typeof lines[LineName]
+  line: Line
   startDistance: number
   direction: 'eastbound' | 'westbound'
   color: string
 }
 
-function Train({ line, startDistance, direction: initialDirection, color }: TrainProps) {
+const Train = ({ line, startDistance, direction: initialDirection, color }: TrainProps) => {
   const [currentDistance, setCurrentDistance] = useState(startDistance)
   const [currentStationIndex, setCurrentStationIndex] = useState(
     initialDirection === 'eastbound' ? 0 : line.stations.length - 1
@@ -207,41 +200,9 @@ function Train({ line, startDistance, direction: initialDirection, color }: Trai
   const [isPaused, setIsPaused] = useState(false)
   const [direction, setDirection] = useState(initialDirection)
 
-  const points = getAbsolutePoints(line.start, line.line)
-  const currentPosition = getPointAtDistance(points, currentDistance)
+  const points = useMemo(() => getAbsolutePoints(line.start, line.line), [line])
+  const currentPosition = useMemo(() => getPointAtDistance(points, currentDistance), [points, currentDistance])
   const endDistance = line.stations[line.stations.length - 1].distance
-
-  // Calculate the angle at a specific distance along the line
-  const getAngleAtDistance = (distance: number) => {
-    let accumulatedDistance = 0
-    for (let i = 0; i < points.length - 1; i++) {
-      const dx = points[i + 1].x - points[i].x
-      const dy = points[i + 1].y - points[i].y
-      const segmentLength = Math.sqrt(dx * dx + dy * dy)
-      
-      if (accumulatedDistance + segmentLength >= distance) {
-        return Math.atan2(dy, dx) * (180 / Math.PI)
-      }
-      accumulatedDistance += segmentLength
-    }
-    return 0
-  }
-
-  // Calculate the position and angle for a car at a given offset from the current position
-  const getCarPosition = (carOffset: number) => {
-    const carDistance = currentDistance + carOffset
-    const angle = getAngleAtDistance(carDistance)
-    const angleRad = angle * (Math.PI / 180)
-    const offsetX = carOffset * Math.cos(angleRad)
-    const offsetY = carOffset * Math.sin(angleRad)
-    const position = getPointAtDistance(points, carDistance)
-    
-    return {
-      x: position.x,
-      y: position.y,
-      angle
-    }
-  }
 
   useEffect(() => {
     if (isPaused) return
@@ -249,11 +210,8 @@ function Train({ line, startDistance, direction: initialDirection, color }: Trai
     const interval = setInterval(() => {
       setCurrentDistance(prev => {
         const nextDistance = prev + (direction === 'westbound' ? -1 : 1)
-        const nextStation = direction === 'westbound'
-          ? line.stations[currentStationIndex - 1]
-          : line.stations[currentStationIndex + 1]
         
-        // Check if we've reached the end of the line
+        // Handle end of line
         if (nextDistance >= endDistance && direction === 'eastbound') {
           setIsPaused(true)
           setTimeout(() => {
@@ -264,7 +222,6 @@ function Train({ line, startDistance, direction: initialDirection, color }: Trai
           return prev
         }
         
-        // Check if we've reached the start of the line
         if (nextDistance <= 1 && direction === 'westbound') {
           setIsPaused(true)
           setTimeout(() => {
@@ -274,16 +231,34 @@ function Train({ line, startDistance, direction: initialDirection, color }: Trai
           }, 1000)
           return prev
         }
+
+        // Handle station stops
+        const nextStationIndex = direction === 'eastbound' 
+          ? currentStationIndex + 1 
+          : currentStationIndex - 1
         
-        if (nextStation && (
-          (direction === 'eastbound' && nextDistance >= nextStation.distance) ||
-          (direction === 'westbound' && nextDistance <= nextStation.distance)
-        )) {
-          setIsPaused(true)
-          setTimeout(() => {
-            setCurrentStationIndex(prev => direction === 'westbound' ? prev - 1 : prev + 1)
-            setIsPaused(false)
-          }, 1000)
+        if (nextStationIndex >= 0 && nextStationIndex < line.stations.length) {
+          const nextStation = line.stations[nextStationIndex]
+          const currentStation = line.stations[currentStationIndex]
+          
+          const isPastCurrentStation = direction === 'eastbound'
+            ? nextDistance > currentStation.distance
+            : nextDistance < currentStation.distance
+          
+          if (isPastCurrentStation) {
+            const shouldStop = direction === 'eastbound'
+              ? nextDistance >= nextStation.distance
+              : nextDistance <= nextStation.distance
+              
+            if (shouldStop) {
+              setIsPaused(true)
+              setTimeout(() => {
+                setCurrentStationIndex(nextStationIndex)
+                setIsPaused(false)
+              }, 1000)
+              return prev
+            }
+          }
         }
         
         return nextDistance
@@ -291,45 +266,116 @@ function Train({ line, startDistance, direction: initialDirection, color }: Trai
     }, 20)
 
     return () => clearInterval(interval)
-  }, [currentStationIndex, isPaused, direction, endDistance])
+  }, [currentStationIndex, isPaused, direction, endDistance, line.stations])
 
-  // Create 6 rectangles for the train
-  const trainCars = Array.from({ length: 6 }).map((_, index) => {
-    // Calculate offset for each car (in distance units)
-    const carOffset = (index - 2.5) * 2.5
-    const { x, y, angle } = getCarPosition(carOffset)
+  const trainCars = useMemo(() => 
+    Array.from({ length: 6 }).map((_, index) => {
+      const carOffset = (index - 2.5) * 2.5
+      const carDistance = currentDistance + carOffset
+      const position = getPointAtDistance(points, carDistance)
+      const angle = getAngleAtDistance(points, carDistance)
 
-    return (
-      <rect
-        key={index}
-        x={x - 2}
-        y={y - 1.5}
-        width={4}
-        height={3}
-        rx={1}
-        fill={color}
-        style={{ zIndex: 1 }}
-        transform={`rotate(${angle}, ${x}, ${y})`}
-      />
-    )
-  })
+      return (
+        <rect
+          key={index}
+          x={position.x - 2}
+          y={position.y - 1.5}
+          width={4}
+          height={3}
+          rx={1}
+          fill={color}
+          style={{ zIndex: 1 }}
+          transform={`rotate(${angle}, ${position.x}, ${position.y})`}
+        />
+      )
+    }), [points, currentDistance, color]
+  )
 
   return <>{trainCars}</>
 }
 
-export default function Map({
+type MapProps = {
+  sizeX?: number
+  sizeY?: number
+  scale?: number
+  strokeWidth?: number
+  translateX?: number
+  translateY?: number
+}
+
+const Map = ({
   sizeX = 1000,
   sizeY = 1000,
+  scale = 3,
   strokeWidth = 10,
   translateX = 0,
   translateY = 0,
-}: {
-  sizeX?: number;
-  sizeY?: number;
-  strokeWidth?: number;
-  translateX?: number;
-  translateY?: number;
-}) {
+}: MapProps) => {
+  const lineElements = useMemo(() => 
+    Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
+      const points = getAbsolutePoints(start, relativePoints)
+      return (
+        <g key={lineName}>
+          {points.map((point, index) => {
+            if (index === points.length - 1) return null
+            return (
+              <line 
+                key={`${lineName}-${index}`}
+                x1={point.x} 
+                y1={point.y} 
+                x2={points[index + 1].x} 
+                y2={points[index + 1].y} 
+                stroke={color} 
+                strokeLinecap="round" 
+                strokeWidth={strokeWidth}
+                style={{ zIndex: 0 }}
+              />
+            )
+          })}
+        </g>
+      )
+    }), [strokeWidth]
+  )
+
+  const stationElements = useMemo(() =>
+    Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
+      const points = getAbsolutePoints(start, relativePoints)
+      return (
+        <g key={`${lineName}-stations`}>
+          {LINES[lineName as LineName].stations.map((station, index) => {
+            const position = getPointAtDistance(points, station.distance)
+            return (
+              <g key={`${lineName}-station-${index}`} style={{ zIndex: 3 }}>
+                <circle
+                  cx={position.x}
+                  cy={position.y}
+                  r={strokeWidth / 1}
+                  fill="white"
+                  style={{ zIndex: 3 }}
+                  stroke={color}
+                  strokeWidth={strokeWidth / 1.5}
+                />
+                <title>{station.name}</title>
+              </g>
+            )
+          })}
+        </g>
+      )
+    }), [strokeWidth]
+  )
+
+  const trainElements = useMemo(() => [
+    <Train key="bd-east" line={LINES["Bloor-Danforth"]} startDistance={1} direction="eastbound" color="#00A859" />,
+    <Train key="bd-west" line={LINES["Bloor-Danforth"]} startDistance={500} direction="westbound" color="#00A859" />,
+    <Train key="yu-east1" line={LINES["Yonge-University"]} startDistance={1} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east2" line={LINES["Yonge-University"]} startDistance={200} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east3" line={LINES["Yonge-University"]} startDistance={400} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east4" line={LINES["Yonge-University"]} startDistance={600} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-west" line={LINES["Yonge-University"]} startDistance={700} direction="westbound" color="#FFCC29" />,
+    <Train key="shep-east" line={LINES["Sheppard"]} startDistance={1} direction="eastbound" color="#A8518A" />,
+    <Train key="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
+  ], [])
+
   return (
     <svg 
       width={sizeX} 
@@ -338,114 +384,14 @@ export default function Map({
         position: 'fixed',
         top: 0,
         left: 0,
-        transform: `translate(${translateX}px, ${translateY}px) scale(4)`
+        transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`
       }}
     >
-      {/* Lines (bottom layer) */}
-      {Object.entries(lines).map(([line, { color, start, line: relativePoints }]) => {
-        const points = getAbsolutePoints(start, relativePoints)
-        return (
-          <>
-            {points.map((point, index) => {
-              if (index === points.length - 1) return null
-              return (
-                <line 
-                  x1={point.x} 
-                  y1={point.y} 
-                  x2={points[index + 1].x} 
-                  y2={points[index + 1].y} 
-                  stroke={color} 
-                  strokeLinecap="round" 
-                  strokeWidth={strokeWidth}
-                  style={{ zIndex: 0 }}
-                />
-              )
-            })}
-          </>
-        )
-      })}
-
-      {/* Trains (middle layer) */}
-      <Train 
-        line={lines["Bloor-Danforth"]} 
-        startDistance={1} 
-        direction="eastbound" 
-        color="#00A859" 
-      />
-      <Train 
-        line={lines["Bloor-Danforth"]} 
-        startDistance={500} 
-        direction="westbound" 
-        color="#00A859" 
-      />
-      <Train 
-        line={lines["Yonge-University"]} 
-        startDistance={1} 
-        direction="eastbound" 
-        color="#FFCC29" 
-      />
-      <Train 
-        line={lines["Yonge-University"]} 
-        startDistance={200} 
-        direction="eastbound" 
-        color="#FFCC29" 
-      />
-      <Train 
-        line={lines["Yonge-University"]} 
-        startDistance={400} 
-        direction="eastbound" 
-        color="#FFCC29" 
-      />
-      <Train 
-        line={lines["Yonge-University"]} 
-        startDistance={600} 
-        direction="eastbound" 
-        color="#FFCC29" 
-      />
-      <Train 
-        line={lines["Yonge-University"]} 
-        startDistance={700} 
-        direction="westbound" 
-        color="#FFCC29" 
-      />
-      <Train 
-        line={lines["Sheppard"]} 
-        startDistance={1} 
-        direction="eastbound" 
-        color="#A8518A" 
-      />
-      <Train 
-        line={lines["Sheppard"]} 
-        startDistance={225} 
-        direction="westbound" 
-        color="#A8518A" 
-      />
-
-      {/* Stations (top layer) */}
-      {Object.entries(lines).map(([line, { color, start, line: relativePoints }]) => {
-        const points = getAbsolutePoints(start, relativePoints)
-        return (
-          <>
-            {lines[line as LineName].stations.map((station: Station, index: number) => {
-              const position = getPointAtDistance(points, station.distance)
-              return (
-                <g key={`${line}-station-${index}`} style={{ zIndex: 3 }}>
-                  <circle
-                    cx={position.x}
-                    cy={position.y}
-                    r={strokeWidth / 1}
-                    fill="white"
-                    style={{ zIndex: 3 }}
-                    stroke={color}
-                    strokeWidth={strokeWidth / 1.5}
-                  />
-                  <title>{station.name}</title>
-                </g>
-              )
-            })}
-          </>
-        )
-      })}
+      {lineElements}
+      {trainElements}
+      {stationElements}
     </svg>
   )
 }
+
+export default Map
