@@ -397,56 +397,92 @@ const Map = ({
     }), [strokeWidth]
   )
 
-  const stationElements = useMemo(() =>
-    Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
-      const points = getAbsolutePoints(start, relativePoints)
-      return (
-        <g key={`${lineName}-stations`}>
-          {LINES[lineName as LineName].stations.map((station, index) => {
-            const position = getPointAtDistance(points, station.distance)
-            const isSelected = selectedStation?.name === station.name && selectedStation?.line === lineName
-            const isUnionStation = station.name === "Union"
-            const isBelowText = isUnionStation || lineName === "Bloor-Danforth" || lineName === "Sheppard"
-            return (
-              <g 
-                key={`${lineName}-station-${index}`} 
-                style={{ zIndex: 3 }}
-                onClick={() => onStationSelect({ ...station, line: lineName as LineName })}
-                className="cursor-pointer"
-              >
-                <circle
-                  cx={position.x}
-                  cy={position.y}
-                  r={isSelected ? strokeWidth * 1.2 : strokeWidth / 1}
-                  fill={isSelected ? color : "white"}
-                  style={{ zIndex: 3 }}
-                  stroke={color}
-                  strokeWidth={strokeWidth / 1.5}
-                />
-                {isSelected && (
-                  <text
-                    x={position.x + (isBelowText ? 0 : -6)}
-                    y={position.y + (isBelowText ? 15 : 3)}
-                    textAnchor={isBelowText ? "middle" : "end"}
-                    fill={color}
-                    style={{
-                      fontSize: '8px',
-                      fontWeight: 'bold',
-                      pointerEvents: 'none',
-                      userSelect: 'none'
-                    }}
-                  >
-                    {station.name}
-                  </text>
-                )}
-                <title>{station.name}</title>
-              </g>
-            )
-          })}
-        </g>
-      )
-    }), [strokeWidth, selectedStation, onStationSelect]
-  )
+  const stationElements = useMemo(() => {
+    // First render non-selected line stations
+    const nonSelectedLineStations = Object.entries(LINES)
+      .filter(([lineName]) => lineName !== selectedStation?.line)
+      .map(([lineName, { color, start, line: relativePoints }]) => {
+        const points = getAbsolutePoints(start, relativePoints)
+        return (
+          <g key={`${lineName}-stations`}>
+            {LINES[lineName as LineName].stations.map((station, index) => {
+              const position = getPointAtDistance(points, station.distance)
+              const isUnionStation = station.name === "Union"
+              const isBelowText = isUnionStation || lineName === "Bloor-Danforth" || lineName === "Sheppard"
+              return (
+                <g 
+                  key={`${lineName}-station-${index}`} 
+                  onClick={() => onStationSelect({ ...station, line: lineName as LineName })}
+                  className="cursor-pointer"
+                >
+                  <circle
+                    cx={position.x}
+                    cy={position.y}
+                    r={strokeWidth / 1}
+                    fill="white"
+                    stroke={color}
+                    strokeWidth={strokeWidth / 1.5}
+                  />
+                  <title>{station.name}</title>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })
+
+    // Then render selected line stations on top
+    const selectedLineStations = selectedStation ? Object.entries(LINES)
+      .filter(([lineName]) => lineName === selectedStation.line)
+      .map(([lineName, { color, start, line: relativePoints }]) => {
+        const points = getAbsolutePoints(start, relativePoints)
+        return (
+          <g key={`${lineName}-stations`}>
+            {LINES[lineName as LineName].stations.map((station, index) => {
+              const position = getPointAtDistance(points, station.distance)
+              const isSelected = selectedStation?.name === station.name && selectedStation?.line === lineName
+              const isUnionStation = station.name === "Union"
+              const isBelowText = isUnionStation || lineName === "Bloor-Danforth" || lineName === "Sheppard"
+              return (
+                <g 
+                  key={`${lineName}-station-${index}`} 
+                  onClick={() => onStationSelect({ ...station, line: lineName as LineName })}
+                  className="cursor-pointer"
+                >
+                  <circle
+                    cx={position.x}
+                    cy={position.y}
+                    r={isSelected ? strokeWidth * 1.2 : strokeWidth / 1}
+                    fill={isSelected ? color : "white"}
+                    stroke={color}
+                    strokeWidth={strokeWidth / 1.5}
+                  />
+                  {isSelected && (
+                    <text
+                      x={position.x + (isBelowText ? 0 : -6)}
+                      y={position.y + (isBelowText ? 15 : 3)}
+                      textAnchor={isBelowText ? "middle" : "end"}
+                      fill={color}
+                      style={{
+                        fontSize: '8px',
+                        fontWeight: 'bold',
+                        pointerEvents: 'none',
+                        userSelect: 'none'
+                      }}
+                    >
+                      {station.name}
+                    </text>
+                  )}
+                  <title>{station.name}</title>
+                </g>
+              )
+            })}
+          </g>
+        )
+      }) : []
+
+    return [...nonSelectedLineStations, ...selectedLineStations]
+  }, [strokeWidth, selectedStation, onStationSelect])
 
   const trainElements = useMemo(() => [
     <Train key="bd-east" line={LINES["Bloor-Danforth"]} startDistance={1} direction="eastbound" color="#00A859" />,
