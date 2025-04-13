@@ -14,15 +14,15 @@ export const StationCard = ({ station, onClose, lineColor, position }: StationCa
     <div 
       className="fixed z-50"
       style={{
-        // left: `${position.x}px`,
-        // top: `${position.y}px`,
-        transform: `translate(${0}px, ${0}px)`,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        // transform: `scale(0.33333)`,
       }}
     >
-      <Card className="w-64 shadow-xl" style={{ borderColor: lineColor }}>
+      <Card className="w-64 shadow-xl scale-[0.33333]" style={{ borderColor: lineColor }}>
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">{station.name}</h3>
+            <h3 className="text-sm font-semibold">{station.name}</h3>
             <button 
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"

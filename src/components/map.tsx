@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { StationCard } from './StationCard'
+import ttcBg from '../map.svg'
 
 // Types
 type Point = { x: number; y: number }
@@ -365,7 +366,7 @@ const Map = ({
       setAdjustedTranslateY(newTranslateY);
 
       // Calculate card position
-      const scaledX = stationPosition.x + 10;
+      const scaledX = stationPosition.x + 0;
       const scaledY = stationPosition.y - 0;
       setCardPosition({ x: scaledX, y: scaledY });
       setSelectedLineColor(lineColor);
@@ -483,32 +484,39 @@ const Map = ({
   }, [selectedStation, cardPosition, scale]);
 
   return (
-    <>
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        transform: `translate(${adjustedTranslateX}px, ${adjustedTranslateY}px) scale(${scale})`,
+        transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none',
+        backgroundImage: `url(${ttcBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'bottom 0px right -50px',
+        backgroundRepeat: 'no-repeat',
+        width: '1500px',
+        height: '1000px',
+      }}
+    >
       <svg 
         width={sizeX} 
         height={sizeY} 
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          transform: `translate(${adjustedTranslateX}px, ${adjustedTranslateY}px) scale(${scale})`,
-          transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none',
-        }}
       >
         {lineElements}
         {trainElements}
         {stationElements}
-        {connectionLine}
+        {/* {connectionLine} */}
       </svg>
-      {selectedStation && cardPosition && (
+      {/* {selectedStation && cardPosition && (
         <StationCard 
           station={selectedStation} 
           onClose={() => onStationSelect(null)} 
           lineColor={selectedLineColor}
           position={cardPosition}
         />
-      )}
-    </>
+      )} */}
+    </div>
   )
 }
 
