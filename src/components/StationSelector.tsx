@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { LINES } from './map';
 
 type LineName = keyof typeof LINES;
-type Station = { distance: number; name: string };
+type Station = { distance: number; name: string; line: LineName };
 
 export const StationSelector = ({ onStationSelect, selectedStation }: { 
   onStationSelect: (station: Station) => void;
@@ -14,14 +14,8 @@ export const StationSelector = ({ onStationSelect, selectedStation }: {
   // Update selector state when station is selected from map
   useEffect(() => {
     if (selectedStation) {
-      // Find which line the station belongs to
-      for (const [lineName, line] of Object.entries(LINES)) {
-        if (line.stations.some(s => s.name === selectedStation.name)) {
-          setSelectedLine(lineName as LineName);
-          setSelectedStationName(selectedStation.name);
-          break;
-        }
-      }
+      setSelectedLine(selectedStation.line);
+      setSelectedStationName(selectedStation.name);
     }
   }, [selectedStation]);
 

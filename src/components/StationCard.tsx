@@ -6,20 +6,15 @@ type StationCardProps = {
   station: Station
   onClose: () => void
   lineColor: string
-  position: { x: number; y: number }
 }
 
-export const StationCard = ({ station, onClose, lineColor, position }: StationCardProps) => {
+export const StationCard = ({ station, onClose, lineColor }: StationCardProps) => {
+  if (!station) return null;
   return (
     <div 
-      className="fixed z-50"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        // transform: `scale(0.33333)`,
-      }}
+      className=""
     >
-      <Card className="w-64 shadow-xl scale-[0.33333]" style={{ borderColor: lineColor }}>
+      <Card className="w-64 shadow-xl border-2 m-4" style={{ borderColor: lineColor }}>
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-semibold">{station.name}</h3>

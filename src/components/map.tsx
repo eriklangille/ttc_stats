@@ -5,7 +5,7 @@ import ttcBg from '../map.svg'
 // Types
 type Point = { x: number; y: number }
 type RelativePoint = { readonly dx: number; readonly dy: number }
-export type Station = { distance: number; name: string }
+export type Station = { distance: number; name: string; line: LineName }
 type Line = {
   color: string
   start: Point
@@ -26,37 +26,37 @@ const LINES = {
       { dx: 50, dy: -50 }
     ],
     stations: [
-      { distance: 1, name: "Kipling" },
-      { distance: 28, name: "Islington" },
-      { distance: 54, name: "Royal York" },
-      { distance: 82, name: "Old Mill" },
-      { distance: 110, name: "Jane" },
-      { distance: 138, name: "Runnymede" },
-      { distance: 165, name: "High Park" },
-      { distance: 193, name: "Keele" },
-      { distance: 221, name: "Dundas West" },
-      { distance: 249, name: "Landsdowne" },
-      { distance: 276, name: "Dufferin" },
-      { distance: 305, name: "Ossington" },
-      { distance: 333, name: "Christie" },
-      { distance: 360, name: "Bathurst" },
-      { distance: 387, name: "Spadina" },
-      { distance: 416, name: "St. George" },
-      { distance: 443, name: "Bay" },
-      { distance: 471, name: "Bloor-Yonge" },
-      { distance: 499, name: "Sherbourne" },
-      { distance: 527, name: "Castle Frank" },
-      { distance: 555, name: "Broadview" },
-      { distance: 583, name: "Chester" },
-      { distance: 611, name: "Pape" },
-      { distance: 639, name: "Donlands" },
-      { distance: 667, name: "Greenwood" },
-      { distance: 695, name: "Coxwell" },
-      { distance: 723, name: "Woodbine" },
-      { distance: 751, name: "Main Street" },
-      { distance: 788, name: "Victoria Park" },
-      { distance: 875, name: "Warden" },
-      { distance: 1000, name: "Kennedy" }
+      { distance: 1, name: "Kipling", line: "Bloor-Danforth" },
+      { distance: 28, name: "Islington", line: "Bloor-Danforth" },
+      { distance: 54, name: "Royal York", line: "Bloor-Danforth" },
+      { distance: 82, name: "Old Mill", line: "Bloor-Danforth" },
+      { distance: 110, name: "Jane", line: "Bloor-Danforth" },
+      { distance: 138, name: "Runnymede", line: "Bloor-Danforth" },
+      { distance: 165, name: "High Park", line: "Bloor-Danforth" },
+      { distance: 193, name: "Keele", line: "Bloor-Danforth" },
+      { distance: 221, name: "Dundas West", line: "Bloor-Danforth" },
+      { distance: 249, name: "Landsdowne", line: "Bloor-Danforth" },
+      { distance: 276, name: "Dufferin", line: "Bloor-Danforth" },
+      { distance: 305, name: "Ossington", line: "Bloor-Danforth" },
+      { distance: 333, name: "Christie", line: "Bloor-Danforth" },
+      { distance: 360, name: "Bathurst", line: "Bloor-Danforth" },
+      { distance: 387, name: "Spadina", line: "Bloor-Danforth" },
+      { distance: 416, name: "St. George", line: "Bloor-Danforth" },
+      { distance: 443, name: "Bay", line: "Bloor-Danforth" },
+      { distance: 471, name: "Bloor-Yonge", line: "Bloor-Danforth" },
+      { distance: 499, name: "Sherbourne", line: "Bloor-Danforth" },
+      { distance: 527, name: "Castle Frank", line: "Bloor-Danforth" },
+      { distance: 555, name: "Broadview", line: "Bloor-Danforth" },
+      { distance: 583, name: "Chester", line: "Bloor-Danforth" },
+      { distance: 611, name: "Pape", line: "Bloor-Danforth" },
+      { distance: 639, name: "Donlands", line: "Bloor-Danforth" },
+      { distance: 667, name: "Greenwood", line: "Bloor-Danforth" },
+      { distance: 695, name: "Coxwell", line: "Bloor-Danforth" },
+      { distance: 723, name: "Woodbine", line: "Bloor-Danforth" },
+      { distance: 751, name: "Main Street", line: "Bloor-Danforth" },
+      { distance: 788, name: "Victoria Park", line: "Bloor-Danforth" },
+      { distance: 875, name: "Warden", line: "Bloor-Danforth" },
+      { distance: 1000, name: "Kennedy", line: "Bloor-Danforth" }
     ]
   },
   "Yonge-University": {
@@ -76,44 +76,44 @@ const LINES = {
       { dx: 0, dy: -30 }
     ],
     stations: [
-      { distance: 1, name: "Finch" },
-      { distance: 28, name: "North York Centre" },
-      { distance: 54, name: "Sheppard-Yonge" },
-      { distance: 110, name: "York Mills" },
-      { distance: 167, name: "Lawrence" },
-      { distance: 222, name: "Eglinton" },
-      { distance: 250, name: "Davisville" },
-      { distance: 278, name: "St. Clair" },
-      { distance: 305, name: "Summerhill" },
-      { distance: 333, name: "Rosedale" },
-      { distance: 361, name: "Bloor-Yonge" },
-      { distance: 389, name: "Wellesley" },
-      { distance: 417, name: "College" },
-      { distance: 445, name: "Dundas" },
-      { distance: 472, name: "Queen" },
-      { distance: 500, name: "King" },
-      { distance: 557, name: "Union" },
-      { distance: 614, name: "St. Andrew" },
-      { distance: 643, name: "Osgoode" },
-      { distance: 669, name: "St. Patrick" },
-      { distance: 697, name: "Queen's Park" },
-      { distance: 725, name: "Museum" },
-      { distance: 753, name: "St. George" },
-      { distance: 792, name: "Spadina" },
-      { distance: 820, name: "Dupont" },
-      { distance: 853, name: "St. Clair West" },
-      { distance: 930, name: "Eglinton West" },
-      { distance: 957, name: "Glencairn" },
-      { distance: 985, name: "Lawrence West" },
-      { distance: 1013, name: "Yorkdale" },
-      { distance: 1041, name: "Wilson" },
-      { distance: 1101, name: "Sheppard West" },
-      { distance: 1167, name: "Downsview Park" },
-      { distance: 1214, name: "Finch West" },
-      { distance: 1252, name: "York University" },
-      { distance: 1292, name: "Pioneer Village" },
-      { distance: 1322, name: "Highway 407" },
-      { distance: 1350, name: "Vaughan Metropolitan Centre" }
+      { distance: 1, name: "Finch", line: "Yonge-University" },
+      { distance: 28, name: "North York Centre", line: "Yonge-University" },
+      { distance: 54, name: "Sheppard-Yonge", line: "Yonge-University" },
+      { distance: 110, name: "York Mills", line: "Yonge-University" },
+      { distance: 167, name: "Lawrence", line: "Yonge-University" },
+      { distance: 222, name: "Eglinton", line: "Yonge-University" },
+      { distance: 250, name: "Davisville", line: "Yonge-University" },
+      { distance: 278, name: "St. Clair", line: "Yonge-University" },
+      { distance: 305, name: "Summerhill", line: "Yonge-University" },
+      { distance: 333, name: "Rosedale", line: "Yonge-University" },
+      { distance: 361, name: "Bloor-Yonge", line: "Yonge-University" },
+      { distance: 389, name: "Wellesley", line: "Yonge-University" },
+      { distance: 417, name: "College", line: "Yonge-University" },
+      { distance: 445, name: "Dundas", line: "Yonge-University" },
+      { distance: 472, name: "Queen", line: "Yonge-University" },
+      { distance: 500, name: "King", line: "Yonge-University" },
+      { distance: 557, name: "Union", line: "Yonge-University" },
+      { distance: 614, name: "St. Andrew", line: "Yonge-University" },
+      { distance: 643, name: "Osgoode", line: "Yonge-University" },
+      { distance: 669, name: "St. Patrick", line: "Yonge-University" },
+      { distance: 697, name: "Queen's Park", line: "Yonge-University" },
+      { distance: 725, name: "Museum", line: "Yonge-University" },
+      { distance: 753, name: "St. George", line: "Yonge-University" },
+      { distance: 792, name: "Spadina", line: "Yonge-University" },
+      { distance: 820, name: "Dupont", line: "Yonge-University" },
+      { distance: 853, name: "St. Clair West", line: "Yonge-University" },
+      { distance: 930, name: "Eglinton West", line: "Yonge-University" },
+      { distance: 957, name: "Glencairn", line: "Yonge-University" },
+      { distance: 985, name: "Lawrence West", line: "Yonge-University" },
+      { distance: 1013, name: "Yorkdale", line: "Yonge-University" },
+      { distance: 1041, name: "Wilson", line: "Yonge-University" },
+      { distance: 1101, name: "Sheppard West", line: "Yonge-University" },
+      { distance: 1167, name: "Downsview Park", line: "Yonge-University" },
+      { distance: 1214, name: "Finch West", line: "Yonge-University" },
+      { distance: 1252, name: "York University", line: "Yonge-University" },
+      { distance: 1292, name: "Pioneer Village", line: "Yonge-University" },
+      { distance: 1322, name: "Highway 407", line: "Yonge-University" },
+      { distance: 1350, name: "Vaughan Metropolitan Centre", line: "Yonge-University" }
     ]
   },
   "Sheppard": {
@@ -123,11 +123,11 @@ const LINES = {
       { dx: 225, dy: 0 }
     ],
     stations: [
-      { distance: 1, name: "Sheppard-Yonge" },
-      { distance: 83, name: "Bayview" },
-      { distance: 125, name: "Bessarion" },
-      { distance: 168, name: "Leslie" },
-      { distance: 225, name: "Don Mills" }
+      { distance: 1, name: "Sheppard-Yonge", line: "Sheppard" },
+      { distance: 83, name: "Bayview", line: "Sheppard" },
+      { distance: 125, name: "Bessarion", line: "Sheppard" },
+      { distance: 168, name: "Leslie", line: "Sheppard" },
+      { distance: 225, name: "Don Mills", line: "Sheppard" }
     ]
   }
 } as const
@@ -335,20 +335,13 @@ const Map = ({
     // Skip animation on initial render
     if (!selectedStation) return;
 
-    let stationPosition: Point | null = null;
-    let lineColor = '';
+    const line = LINES[selectedStation.line];
+    const station = line.stations.find(s => s.name === selectedStation.name);
+    if (station) {
+      const points = getAbsolutePoints(line.start, line.line);
+      const stationPosition = getPointAtDistance(points, station.distance);
+      const lineColor = line.color;
 
-    for (const [lineName, line] of Object.entries(LINES)) {
-      const station = line.stations.find(s => s.name === selectedStation.name);
-      if (station) {
-        const points = getAbsolutePoints(line.start, line.line);
-        stationPosition = getPointAtDistance(points, station.distance);
-        lineColor = line.color;
-        break;
-      }
-    }
-
-    if (stationPosition) {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
@@ -411,12 +404,14 @@ const Map = ({
         <g key={`${lineName}-stations`}>
           {LINES[lineName as LineName].stations.map((station, index) => {
             const position = getPointAtDistance(points, station.distance)
-            const isSelected = selectedStation?.name === station.name
+            const isSelected = selectedStation?.name === station.name && selectedStation?.line === lineName
+            const isUnionStation = station.name === "Union"
+            const isBelowText = isUnionStation || lineName === "Bloor-Danforth" || lineName === "Sheppard"
             return (
               <g 
                 key={`${lineName}-station-${index}`} 
                 style={{ zIndex: 3 }}
-                onClick={() => onStationSelect(station)}
+                onClick={() => onStationSelect({ ...station, line: lineName as LineName })}
                 className="cursor-pointer"
               >
                 <circle
@@ -428,6 +423,22 @@ const Map = ({
                   stroke={color}
                   strokeWidth={strokeWidth / 1.5}
                 />
+                {isSelected && (
+                  <text
+                    x={position.x + (isBelowText ? 0 : -6)}
+                    y={position.y + (isBelowText ? 15 : 3)}
+                    textAnchor={isBelowText ? "middle" : "end"}
+                    fill={color}
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: 'bold',
+                      pointerEvents: 'none',
+                      userSelect: 'none'
+                    }}
+                  >
+                    {station.name}
+                  </text>
+                )}
                 <title>{station.name}</title>
               </g>
             )
@@ -448,40 +459,6 @@ const Map = ({
     <Train key="shep-east" line={LINES["Sheppard"]} startDistance={1} direction="eastbound" color="#A8518A" />,
     <Train key="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
   ], [])
-
-  // Add connection line when station is selected
-  const connectionLine = useMemo(() => {
-    if (!selectedStation || !cardPosition) return null;
-
-    let stationPosition: Point | null = null;
-    let lineColor = '';
-
-    // Find the station position and line color
-    for (const [lineName, line] of Object.entries(LINES)) {
-      const station = line.stations.find(s => s.name === selectedStation.name);
-      if (station) {
-        const points = getAbsolutePoints(line.start, line.line);
-        stationPosition = getPointAtDistance(points, station.distance);
-        lineColor = line.color;
-        break;
-      }
-    }
-
-    if (!stationPosition) return null;
-
-    return (
-      <line
-        x1={stationPosition.x}
-        y1={stationPosition.y}
-        x2={cardPosition.x}
-        y2={cardPosition.y}
-        stroke={lineColor}
-        strokeWidth={0.5}
-        // strokeDasharray="5,5"
-        style={{ zIndex: 1 }}
-      />
-    );
-  }, [selectedStation, cardPosition, scale]);
 
   return (
     <div
@@ -506,16 +483,7 @@ const Map = ({
         {lineElements}
         {trainElements}
         {stationElements}
-        {/* {connectionLine} */}
       </svg>
-      {/* {selectedStation && cardPosition && (
-        <StationCard 
-          station={selectedStation} 
-          onClose={() => onStationSelect(null)} 
-          lineColor={selectedLineColor}
-          position={cardPosition}
-        />
-      )} */}
     </div>
   )
 }
