@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { StationCard } from './StationCard'
 import ttcBg from '../map.svg'
 
 // Types
@@ -485,13 +484,33 @@ const Map = ({
   }, [strokeWidth, selectedStation, onStationSelect])
 
   const trainElements = useMemo(() => [
-    <Train key="bd-east" line={LINES["Bloor-Danforth"]} startDistance={1} direction="eastbound" color="#00A859" />,
-    <Train key="bd-west" line={LINES["Bloor-Danforth"]} startDistance={500} direction="westbound" color="#00A859" />,
+    // Bloor-Danforth trains
+    <Train key="bd-east1" line={LINES["Bloor-Danforth"]} startDistance={1} direction="eastbound" color="#00A859" />,
+    <Train key="bd-east2" line={LINES["Bloor-Danforth"]} startDistance={250} direction="eastbound" color="#00A859" />,
+    <Train key="bd-east3" line={LINES["Bloor-Danforth"]} startDistance={500} direction="eastbound" color="#00A859" />,
+    <Train key="bd-east4" line={LINES["Bloor-Danforth"]} startDistance={750} direction="eastbound" color="#00A859" />,
+    <Train key="bd-west1" line={LINES["Bloor-Danforth"]} startDistance={1000} direction="westbound" color="#00A859" />,
+    <Train key="bd-west2" line={LINES["Bloor-Danforth"]} startDistance={750} direction="westbound" color="#00A859" />,
+    <Train key="bd-west3" line={LINES["Bloor-Danforth"]} startDistance={500} direction="westbound" color="#00A859" />,
+    <Train key="bd-west4" line={LINES["Bloor-Danforth"]} startDistance={250} direction="westbound" color="#00A859" />,
+    
+    // Yonge-University trains
     <Train key="yu-east1" line={LINES["Yonge-University"]} startDistance={1} direction="eastbound" color="#FFCC29" />,
     <Train key="yu-east2" line={LINES["Yonge-University"]} startDistance={200} direction="eastbound" color="#FFCC29" />,
     <Train key="yu-east3" line={LINES["Yonge-University"]} startDistance={400} direction="eastbound" color="#FFCC29" />,
     <Train key="yu-east4" line={LINES["Yonge-University"]} startDistance={600} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-west" line={LINES["Yonge-University"]} startDistance={700} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-east5" line={LINES["Yonge-University"]} startDistance={800} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east6" line={LINES["Yonge-University"]} startDistance={1000} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east7" line={LINES["Yonge-University"]} startDistance={1200} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-west1" line={LINES["Yonge-University"]} startDistance={1350} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west2" line={LINES["Yonge-University"]} startDistance={1150} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west3" line={LINES["Yonge-University"]} startDistance={950} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west4" line={LINES["Yonge-University"]} startDistance={750} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west5" line={LINES["Yonge-University"]} startDistance={550} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west6" line={LINES["Yonge-University"]} startDistance={350} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west7" line={LINES["Yonge-University"]} startDistance={150} direction="westbound" color="#FFCC29" />,
+    
+    // Sheppard trains (unchanged)
     <Train key="shep-east" line={LINES["Sheppard"]} startDistance={1} direction="eastbound" color="#A8518A" />,
     <Train key="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
   ], [])
