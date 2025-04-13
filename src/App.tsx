@@ -16,14 +16,11 @@ export function App() {
         />
       </div>
       <div className="max-w-7xl mx-auto p-8 text-center">
-        {/* positive x -> left, positive y -> up */}
         <Map 
           sizeX={1500} 
           scale={3} 
           sizeY={1000} 
           strokeWidth={2} 
-          translateX={100} 
-          translateY={-100} 
           selectedStation={selectedStation}
           onStationSelect={setSelectedStation}
         />

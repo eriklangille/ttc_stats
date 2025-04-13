@@ -1,10 +1,4 @@
 import type { Station } from './map'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { X } from "lucide-react"
 
@@ -20,9 +14,9 @@ export const StationCard = ({ station, onClose, lineColor, position }: StationCa
     <div 
       className="fixed z-50"
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: 'translate(-50%, -100%)',
+        // left: `${position.x}px`,
+        // top: `${position.y}px`,
+        transform: `translate(${0}px, ${0}px)`,
       }}
     >
       <Card className="w-64 shadow-xl" style={{ borderColor: lineColor }}>

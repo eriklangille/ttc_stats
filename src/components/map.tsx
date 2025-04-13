@@ -300,8 +300,6 @@ type MapProps = {
   sizeY?: number
   scale?: number
   strokeWidth?: number
-  translateX?: number
-  translateY?: number
   selectedStation?: Station | null
   onStationSelect: (station: Station | null) => void
 }
@@ -311,16 +309,73 @@ const Map = ({
   sizeY = 1000,
   scale = 3,
   strokeWidth = 10,
-  translateX = 0,
-  translateY = 0,
   selectedStation = null,
   onStationSelect,
 }: MapProps) => {
-  const [adjustedTranslateX, setAdjustedTranslateX] = useState(translateX);
-  const [adjustedTranslateY, setAdjustedTranslateY] = useState(translateY);
+  // Find initial Sheppard-Yonge station position
+  const initialStation = LINES["Yonge-University"].stations.find(s => s.name === "Sheppard-Yonge")!;
+  const initialPoints = getAbsolutePoints(LINES["Yonge-University"].start, LINES["Yonge-University"].line);
+  const initialPosition = getPointAtDistance(initialPoints, initialStation.distance);
+  const midX = sizeX / 2;
+  const midY = sizeY / 2;
+  const offsetX = initialPosition.x - midX;
+  const offsetY = initialPosition.y - midY;
+  const initialTranslateX = -offsetX * scale;
+  const initialTranslateY = -offsetY * scale;
+
+  const [adjustedTranslateX, setAdjustedTranslateX] = useState(initialTranslateX);
+  const [adjustedTranslateY, setAdjustedTranslateY] = useState(initialTranslateY);
   const [cardPosition, setCardPosition] = useState<{ x: number; y: number } | null>(null);
   const [selectedLineColor, setSelectedLineColor] = useState<string>('');
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Calculate position based on selected station
+  useEffect(() => {
+    // Skip animation on initial render
+    if (!selectedStation) return;
+
+    let stationPosition: Point | null = null;
+    let lineColor = '';
+
+    for (const [lineName, line] of Object.entries(LINES)) {
+      const station = line.stations.find(s => s.name === selectedStation.name);
+      if (station) {
+        const points = getAbsolutePoints(line.start, line.line);
+        stationPosition = getPointAtDistance(points, station.distance);
+        lineColor = line.color;
+        break;
+      }
+    }
+
+    if (stationPosition) {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      const midX = sizeX / 2;
+      const midY = sizeY / 2;
+
+      const offsetX = stationPosition.x - midX;
+      const offsetY = stationPosition.y - midY;
+
+      const newTranslateX = -offsetX * scale - (sizeX - viewportWidth) / 2;
+      const newTranslateY = -offsetY * scale - (sizeY - viewportHeight) / 2;
+
+      setIsAnimating(true);
+      setAdjustedTranslateX(newTranslateX);
+      setAdjustedTranslateY(newTranslateY);
+
+      // Calculate card position
+      const scaledX = stationPosition.x + 10;
+      const scaledY = stationPosition.y - 0;
+      setCardPosition({ x: scaledX, y: scaledY });
+      setSelectedLineColor(lineColor);
+
+      // Reset animation state after transition
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 500);
+    }
+  }, [selectedStation, scale, sizeX, sizeY]);
 
   const lineElements = useMemo(() => 
     Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
@@ -413,78 +468,19 @@ const Map = ({
 
     if (!stationPosition) return null;
 
-    // Calculate the scaled position
-    const scaledX = stationPosition.x;
-    const scaledY = stationPosition.y;
-
     return (
       <line
-        x1={scaledX}
-        y1={scaledY}
+        x1={stationPosition.x}
+        y1={stationPosition.y}
         x2={cardPosition.x}
-        y2={cardPosition.y / 3}
+        y2={cardPosition.y}
         stroke={lineColor}
-        strokeWidth={2}
-        strokeDasharray="5,5"
+        strokeWidth={0.5}
+        // strokeDasharray="5,5"
         style={{ zIndex: 1 }}
       />
     );
   }, [selectedStation, cardPosition, scale]);
-
-  useEffect(() => {
-    if (selectedStation) {
-      // Find the line and station position
-      let stationPosition: Point | null = null;
-      let lineColor = '';
-
-      for (const [lineName, line] of Object.entries(LINES)) {
-        const station = line.stations.find(s => s.name === selectedStation.name);
-        if (station) {
-          const points = getAbsolutePoints(line.start, line.line);
-          stationPosition = getPointAtDistance(points, station.distance);
-          lineColor = line.color;
-          break;
-        }
-      }
-
-      if (stationPosition) {
-        const midX = sizeX / 2;
-        const midY = sizeY / 2;
-
-        const offsetX = stationPosition.x - midX;
-        const offsetY = stationPosition.y - midY;
-
-        const newTranslateX = -offsetX * scale;
-        const newTranslateY = -offsetY * scale;
-
-        setIsAnimating(true);
-        setAdjustedTranslateX(newTranslateX);
-        setAdjustedTranslateY(newTranslateY);
-
-        // Calculate card position
-        const scaledX = stationPosition.x + newTranslateX;
-        const scaledY = stationPosition.y + newTranslateY;
-        setCardPosition({ x: scaledX, y: scaledY });
-        setSelectedLineColor(lineColor);
-
-        // Reset animation state after transition
-        setTimeout(() => {
-          setIsAnimating(false);
-        }, 500);
-      }
-    } else {
-      setIsAnimating(true);
-      setAdjustedTranslateX(translateX);
-      setAdjustedTranslateY(translateY);
-      setCardPosition(null);
-      setSelectedLineColor('');
-
-      // Reset animation state after transition
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 500);
-    }
-  }, [selectedStation, scale, translateX, translateY, sizeX, sizeY]);
 
   return (
     <>
