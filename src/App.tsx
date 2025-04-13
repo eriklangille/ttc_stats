@@ -9,7 +9,7 @@ export function App() {
 
   return (
     <div className="relative">
-      <div className="fixed top-4 left-4 z-50">
+      <div className="fixed top-0 left-0 z-50">
         <StationSelector 
           onStationSelect={setSelectedStation} 
           selectedStation={selectedStation}

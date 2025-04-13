@@ -34,7 +34,7 @@ export const StationSelector = ({ onStationSelect, selectedStation }: {
   }, [selectedLine, selectedStationName, onStationSelect]);
 
   return (
-    <div className="flex gap-4 items-center bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+    <div className="flex flex-wrap m-4 gap-4 items-center bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
       <select
         value={selectedLine}
         onChange={(e) => {
