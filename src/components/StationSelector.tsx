@@ -4,9 +4,10 @@ import { LINES } from './map';
 type LineName = keyof typeof LINES;
 type Station = { distance: number; name: string; line: LineName };
 
-export const StationSelector = ({ onStationSelect, selectedStation }: { 
+export const StationSelector = ({ onStationSelect, selectedStation, lineColor }: { 
   onStationSelect: (station: Station) => void;
   selectedStation: Station | null;
+  lineColor: string;
 }) => {
   const [selectedLine, setSelectedLine] = useState<LineName>('Yonge-University');
   const [selectedStationName, setSelectedStationName] = useState<string>('Sheppard-Yonge');
@@ -27,8 +28,12 @@ export const StationSelector = ({ onStationSelect, selectedStation }: {
     }
   }, [selectedLine, selectedStationName, onStationSelect]);
 
+  console.log(lineColor);
+
   return (
-    <div className="flex flex-wrap m-4 gap-4 items-center bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg">
+    <div
+      className={`flex flex-wrap m-4 gap-4 border-1 items-center bg-white/50 backdrop-blur-sm p-4 rounded-lg shadow-lg`}
+      style={{ borderColor: lineColor }}>
       <select
         value={selectedLine}
         onChange={(e) => {

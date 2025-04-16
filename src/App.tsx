@@ -3,7 +3,7 @@ import { useState } from "react";
 import Map from "./components/map";
 import { StationSelector } from "./components/StationSelector";
 import type { Station } from "./components/map";
-import { StationCard } from "./components/StationCard";
+import { DraggableCard } from "./components/DraggableCard";
 import { LINES } from "./components/map";
 
 type LineName = keyof typeof LINES;
@@ -17,13 +17,15 @@ export function App() {
         <StationSelector 
           onStationSelect={setSelectedStation} 
           selectedStation={selectedStation}
-        />
-        <StationCard
-          station={selectedStation}
-          onClose={() => setSelectedStation(null)}
-          lineColor={LINES[selectedStation?.line as LineName]?.color}
+          lineColor={LINES[selectedStation?.line as LineName ?? "Bloor-Danforth"]?.color}
         />
       </div>
+      {selectedStation && (
+        <DraggableCard
+          station={selectedStation}
+          lineColor={LINES[selectedStation.line as LineName]?.color}
+        />
+      )}
       <div className="max-w-7xl mx-auto p-8 text-center">
         <Map 
           sizeX={1500} 

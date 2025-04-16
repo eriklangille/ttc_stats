@@ -63,15 +63,6 @@ export function getTopIncidentsForStation(
   const descriptionIndex = header.indexOf("Description");
   const delayIndex = header.indexOf("Min Delay");
 
-  console.log(
-    stationIndex,
-    lineIndex,
-    dateIndex,
-    timeIndex,
-    descriptionIndex,
-    delayIndex
-  );
-
   const stationIncidents = incidents
     .slice(1)
     .map((line) => {
@@ -80,7 +71,6 @@ export function getTopIncidentsForStation(
       if (!station || !lineName) return null;
 
       if (stationName === station.name && lineName === station.line) {
-        console.log(line);
         return {
           year: line[yearIndex],
           date: line[dateIndex],
