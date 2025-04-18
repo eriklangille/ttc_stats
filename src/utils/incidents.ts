@@ -50,6 +50,40 @@ export function parseStationName(stationName: string): {
   };
 }
 
+// ["danger_rank","standard_name","line","Incident_Count","Average_Danger","Combined_Score","Usage","usage_rank"]
+// [1,"Bloor-Yonge","Yonge-University",469,2.0511727078891258,235.52558635394456,156643.0,1.0]
+export function getStationRanks(
+  station: Station,
+  rankData: any
+): {
+  dangerRank: number;
+  usageRank: number;
+} {
+  const header = rankData[0];
+  const stationIndex = header.indexOf("standard_name");
+  const lineIndex = header.indexOf("line");
+  const dangerRankIndex = header.indexOf("danger_rank");
+  const usageRankIndex = header.indexOf("usage_rank");
+
+  const stationRank = rankData.slice(1).find((line) => {
+    const stationName = line[stationIndex];
+    const lineName = line[lineIndex];
+    return stationName === station.name && lineName === station.line;
+  });
+
+  if (!stationRank) {
+    return {
+      dangerRank: 0,
+      usageRank: 0,
+    };
+  }
+
+  return {
+    dangerRank: stationRank[dangerRankIndex],
+    usageRank: stationRank[usageRankIndex],
+  };
+}
+
 // ["line","standard_name","Hour","Days_With_Delays","Average_Delay_Minutes","Delay_Likelihood_Percent"]
 // ["Yonge-University","Eglinton",5,114,6.209677419354839,14.578005115089516]
 export function getStationDelayLikelihood(

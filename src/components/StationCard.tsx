@@ -1,8 +1,10 @@
 import type { Station } from './map'
 import { Card, CardContent } from "@/components/ui/card"
-import { getTopIncidentsForStation, getStationDelayLikelihood } from '../utils/incidents'
+import { getTopIncidentsForStation, getStationDelayLikelihood, getStationRanks } from '../utils/incidents'
 import topIncidents from '../all_stations_top_incidents_by_year.json'
 import stationDelayData from '../station_delay_likelihood_by_hour.json'
+import stationRankData from '../station_ranking.json'
+import { TriangleAlert, Users } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
 type StationCardProps = {
@@ -21,12 +23,23 @@ export const StationCard = ({ station, lineColor }: StationCardProps) => {
   if (!station) return null;
   const incidents = getTopIncidentsForStation(station, topIncidents);
   const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
+  const { dangerRank, usageRank } = getStationRanks(station, stationRankData);
 
   return (
     <Card className="w-96 shadow-xl bg-white/50 backdrop-blur-sm border-1 m-4" style={{ borderColor: lineColor }}>
       <CardContent className="p-4 max-h-[600px] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-lg font-semibold">{station.name}</h3>
+          <div className="flex gap-2 text-sm">
+            <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
+              <TriangleAlert size={16} />
+              {dangerRank}/74
+            </span>
+            <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
+              <Users size={16} />
+              {usageRank}/74
+            </span>
+          </div>
         </div>
         
         <div className="mt-4">
