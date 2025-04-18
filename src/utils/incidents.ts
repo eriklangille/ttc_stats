@@ -50,6 +50,41 @@ export function parseStationName(stationName: string): {
   };
 }
 
+// ["line","standard_name","Hour","Days_With_Delays","Average_Delay_Minutes","Delay_Likelihood_Percent"]
+// ["Yonge-University","Eglinton",5,114,6.209677419354839,14.578005115089516]
+export function getStationDelayLikelihood(
+  station: Station,
+  delayData: any
+): { hour: number; likelihood: number }[] {
+  const header = delayData[0];
+  const lineIndex = header.indexOf("line");
+  const stationIndex = header.indexOf("standard_name");
+  const hourIndex = header.indexOf("Hour");
+  const likelihoodIndex = header.indexOf("Delay_Likelihood_Percent");
+
+  // Create a map of all hours with 0% probability
+  const allHours = Array.from({ length: 24 }, (_, i) => ({
+    hour: i,
+    likelihood: 0,
+  }));
+
+  // Update the map with actual data
+  delayData
+    .slice(1)
+    .filter((line) => {
+      const stationName = line[stationIndex];
+      const lineName = line[lineIndex];
+      return stationName === station.name && lineName === station.line;
+    })
+    .forEach((line) => {
+      const hour = line[hourIndex];
+      const likelihood = line[likelihoodIndex];
+      allHours[hour] = { hour, likelihood };
+    });
+
+  return allHours;
+}
+
 export function getTopIncidentsForStation(
   station: Station,
   incidents: any

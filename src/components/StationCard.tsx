@@ -1,24 +1,61 @@
 import type { Station } from './map'
 import { Card, CardContent } from "@/components/ui/card"
-import { getTopIncidentsForStation } from '../utils/incidents'
-import data from '../all_stations_top_incidents_by_year.json'
+import { getTopIncidentsForStation, getStationDelayLikelihood } from '../utils/incidents'
+import topIncidents from '../all_stations_top_incidents_by_year.json'
+import stationDelayData from '../station_delay_likelihood_by_hour.json'
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
 type StationCardProps = {
   station: Station
   lineColor: string
 }
 
+const formatHour = (hour: number) => {
+  if (hour === 0) return '12A';
+  if (hour < 12) return `${hour}A`;
+  if (hour === 12) return '12P';
+  return `${hour - 12}P`;
+}
+
 export const StationCard = ({ station, lineColor }: StationCardProps) => {
   if (!station) return null;
-  const incidents = getTopIncidentsForStation(station, data);
+  const incidents = getTopIncidentsForStation(station, topIncidents);
+  const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
 
   return (
     <Card className="w-96 shadow-xl bg-white/50 backdrop-blur-sm border-1 m-4" style={{ borderColor: lineColor }}>
-      <CardContent className="p-4">
+      <CardContent className="p-4 max-h-[600px] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-lg font-semibold">{station.name}</h3>
         </div>
         
+        <div className="mt-4">
+          <h4 className="text-sm font-medium mb-2">Delay Likelihood by Hour</h4>
+          <div className="h-48 mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={delayLikelihood} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <XAxis 
+                  dataKey="hour" 
+                  tick={{ fontSize: 10 }}
+                  interval={1}
+                  tickFormatter={formatHour}
+                />
+                <YAxis 
+                  tick={{ fontSize: 10 }}
+                  tickFormatter={(value) => `${value}%`}
+                />
+                <Bar 
+                  dataKey="likelihood" 
+                  fill={lineColor}
+                  radius={[4, 4, 0, 0]}
+                  isAnimationActive={false}
+                  style={{ cursor: 'default' }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
         <div className="mt-4">
           <h4 className="text-sm font-medium mb-2">Top 10 Incidents</h4>
           {incidents.length > 0 ? (
