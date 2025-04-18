@@ -13,10 +13,14 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
   const startY = useRef(0);
   const startHeight = useRef(0);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const lastTouchTime = useRef(0);
+  const lastTouchY = useRef(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startY.current = e.touches[0].clientY;
     startHeight.current = height;
+    lastTouchTime.current = Date.now();
+    lastTouchY.current = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -28,11 +32,23 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
   };
 
   const handleTouchEnd = () => {
-    // Snap to nearest position
-    if (height > 60) {
+    const currentTime = Date.now();
+    const timeDiff = currentTime - lastTouchTime.current;
+    const yDiff = lastTouchY.current - startY.current;
+    const velocity = Math.abs(yDiff) / timeDiff;
+
+    // If it's a quick flick (high velocity) and moved up, snap to top
+    if (velocity > 0.5 && yDiff > 0) {
       setHeight(80);
-    } else {
+    } else if (velocity > 0.5 && yDiff < 0) {
       setHeight(40);
+    } else {
+      // Regular snap logic
+      if (height > 60) {
+        setHeight(80);
+      } else {
+        setHeight(40);
+      }
     }
   };
 
@@ -41,19 +57,21 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
   return (
     <div 
       ref={sheetRef}
-      className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl shadow-lg transition-transform duration-200"
+      className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl shadow-lg transition-all duration-300 ease-out overflow-hidden"
       style={{ 
         height: `${height}vh`,
         transform: `translateY(${isOpen ? '0' : '100%'})`
       }}
     >
-      <StationCard
-        station={station}
-        lineColor={lineColor}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      />
+      <div className="h-full flex flex-col">
+        <StationCard
+          station={station}
+          lineColor={lineColor}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        />
+      </div>
     </div>
   );
 }; 
