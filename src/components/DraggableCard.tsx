@@ -7,7 +7,8 @@ type DraggableCardProps = {
   lineColor: string;
 };
 
-const STATION_SELECTOR_HEIGHT = -300;
+const STATION_SELECTOR_HEIGHT = 125;
+const STATION_SELECTOR_WIDTH = 48;
 const MAX_CARD_HEIGHT = '80vh'; // Maximum height of the card
 
 export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
@@ -35,11 +36,15 @@ export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
     const newX = e.clientX - startPos.x;
     const newY = e.clientY - startPos.y;
 
+    const windowHeight = window.innerHeight / 2;
+    const windowWidth = window.innerWidth / 2;
+
     // Prevent card from going above the StationSelector (y < 64)
-    const constrainedY = Math.max(STATION_SELECTOR_HEIGHT, newY);
-    
+    const constrainedX = Math.max(-windowWidth + STATION_SELECTOR_WIDTH, newX);
+    const constrainedY = Math.max(-windowHeight + STATION_SELECTOR_HEIGHT, newY);
+
     setPosition({
-      x: newX,
+      x: constrainedX,
       y: constrainedY
     });
   };

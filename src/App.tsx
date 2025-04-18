@@ -49,7 +49,7 @@ export function App() {
       <div className="max-w-7xl mx-auto p-8 text-center">
         <Map 
           sizeX={1500} 
-          scale={3} 
+          scale={isMobile ? 2.25 : 3} 
           sizeY={1000} 
           strokeWidth={2} 
           selectedStation={selectedStation}

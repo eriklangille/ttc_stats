@@ -8,8 +8,16 @@ type MobileStationCardProps = {
 };
 
 export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps) => {
+  // Height constants
+  const MIN_HEIGHT = 12; // Minimum height as percentage of viewport
+  const MID_HEIGHT = 40; // Middle height as percentage of viewport
+  const MAX_HEIGHT = 80; // Maximum height as percentage of viewport
+  const SNAP_THRESHOLD = 27.5; // Threshold between MIN and MID heights
+  const SNAP_THRESHOLD_HIGH = 60; // Threshold between MID and MAX heights
+  const VELOCITY_THRESHOLD = 0.2; // Threshold for quick flick detection
+
   const [isOpen, setIsOpen] = useState(true);
-  const [height, setHeight] = useState(40); // percentage of viewport height
+  const [height, setHeight] = useState(MID_HEIGHT);
   const startY = useRef(0);
   const startHeight = useRef(0);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -27,7 +35,7 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
     if (!sheetRef.current) return;
     
     const deltaY = startY.current - e.touches[0].clientY;
-    const newHeight = Math.min(80, Math.max(40, startHeight.current + (deltaY / window.innerHeight) * 100));
+    const newHeight = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, startHeight.current + (deltaY / window.innerHeight) * 100));
     setHeight(newHeight);
   };
 
@@ -37,17 +45,21 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
     const yDiff = lastTouchY.current - startY.current;
     const velocity = Math.abs(yDiff) / timeDiff;
 
-    // If it's a quick flick (high velocity) and moved up, snap to top
-    if (velocity > 0.5 && yDiff > 0) {
-      setHeight(80);
-    } else if (velocity > 0.5 && yDiff < 0) {
-      setHeight(40);
+    // If it's a quick flick (high velocity)
+    if (velocity > VELOCITY_THRESHOLD) {
+      if (yDiff > 0) { // Moving up
+        setHeight(MAX_HEIGHT);
+      } else { // Moving down
+        setHeight(MIN_HEIGHT);
+      }
     } else {
       // Regular snap logic
-      if (height > 60) {
-        setHeight(80);
+      if (height > SNAP_THRESHOLD_HIGH) {
+        setHeight(MAX_HEIGHT);
+      } else if (height > SNAP_THRESHOLD) {
+        setHeight(MID_HEIGHT);
       } else {
-        setHeight(40);
+        setHeight(MIN_HEIGHT);
       }
     }
   };
