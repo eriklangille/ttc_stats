@@ -62,16 +62,16 @@ export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
   return (
     <div
       ref={cardRef}
-      className="fixed z-50 w-96 cursor-move"
+      className="fixed z-50 w-96"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
         userSelect: 'none'
       }}
-      onMouseDown={handleMouseDown}
     >
       <StationCard
         station={station}
         lineColor={lineColor}
+        onMouseDown={handleMouseDown}
       />
     </div>
   );

@@ -10,6 +10,10 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 type StationCardProps = {
   station: Station
   lineColor: string
+  onTouchStart?: (e: React.TouchEvent) => void
+  onTouchMove?: (e: React.TouchEvent) => void
+  onTouchEnd?: () => void
+  onMouseDown?: (e: React.MouseEvent) => void
 }
 
 const formatHour = (hour: number) => {
@@ -19,15 +23,31 @@ const formatHour = (hour: number) => {
   return `${hour - 12}P`;
 }
 
-export const StationCard = ({ station, lineColor }: StationCardProps) => {
+export const StationCard = ({ 
+  station, 
+  lineColor,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  onMouseDown
+}: StationCardProps) => {
   if (!station) return null;
   const incidents = getTopIncidentsForStation(station, topIncidents);
   const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
   const { dangerRank, usageRank } = getStationRanks(station, stationRankData);
 
   return (
-    <Card className="w-96 shadow-xl bg-white/50 backdrop-blur-sm border-1 m-4" style={{ borderColor: lineColor }}>
-      <CardContent className="p-4 max-h-[600px] overflow-y-auto">
+    <Card className="w-full shadow-none border-1 bg-white/60 backdrop-blur-sm" style={{ borderColor: lineColor }}>
+      <div 
+        className="w-full h-12 flex justify-center items-center touch-none cursor-move"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+      >
+        <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+      </div>
+      <CardContent className="p-4 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-lg font-semibold">{station.name}</h3>
           <div className="flex gap-2 text-sm">

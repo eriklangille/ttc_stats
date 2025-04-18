@@ -1,19 +1,32 @@
 import "./index.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Map from "./components/map";
 import { StationSelector } from "./components/StationSelector";
 import type { Station } from "./components/map";
 import { DraggableCard } from "./components/DraggableCard";
+import { MobileStationCard } from "./components/MobileStationCard";
 import { LINES } from "./components/map";
 
 type LineName = keyof typeof LINES;
 
 export function App() {
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   return (
     <div className="relative">
-      <div className="fixed top-0 left-0 z-50">
+      <div className="fixed top-0 left-0 z-50 w-full sm:w-auto">
         <StationSelector 
           onStationSelect={setSelectedStation} 
           selectedStation={selectedStation}
@@ -21,10 +34,17 @@ export function App() {
         />
       </div>
       {selectedStation && (
-        <DraggableCard
-          station={selectedStation}
-          lineColor={LINES[selectedStation.line as LineName]?.color}
-        />
+        isMobile ? (
+          <MobileStationCard
+            station={selectedStation}
+            lineColor={LINES[selectedStation.line as LineName]?.color}
+          />
+        ) : (
+          <DraggableCard
+            station={selectedStation}
+            lineColor={LINES[selectedStation.line as LineName]?.color}
+          />
+        )
       )}
       <div className="max-w-7xl mx-auto p-8 text-center">
         <Map 

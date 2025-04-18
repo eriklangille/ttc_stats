@@ -32,7 +32,7 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor }:
 
   return (
     <div
-      className={`flex flex-wrap m-4 gap-4 border-1 items-center bg-white/50 backdrop-blur-sm p-4 rounded-lg shadow-lg`}
+      className={`flex flex-col sm:flex-row flex-wrap w-full sm:m-4 gap-4 border-1 items-center bg-white/60 backdrop-blur-sm p-4 rounded-lg shadow-lg`}
       style={{ borderColor: lineColor }}>
       <select
         value={selectedLine}
@@ -41,7 +41,7 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor }:
           // Reset station to first station of the new line
           setSelectedStationName(LINES[e.target.value as LineName].stations[0].name);
         }}
-        className="px-4 py-2 rounded-lg border border-gray-300 bg-white min-w-[200px]"
+        className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 bg-white"
       >
         {Object.keys(LINES).map((line) => (
           <option key={line} value={line}>
@@ -53,7 +53,7 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor }:
       <select
         value={selectedStationName}
         onChange={(e) => setSelectedStationName(e.target.value)}
-        className="px-4 py-2 rounded-lg border border-gray-300 bg-white min-w-[200px]"
+        className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-300 bg-white"
       >
         {LINES[selectedLine].stations.map((station) => (
           <option key={station.name} value={station.name}>
