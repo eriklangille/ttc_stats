@@ -10,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 type StationCardProps = {
   station: Station
   lineColor: string
+  isMobile: boolean
   onTouchStart?: (e: React.TouchEvent) => void
   onTouchMove?: (e: React.TouchEvent) => void
   onTouchEnd?: () => void
@@ -26,6 +27,7 @@ const formatHour = (hour: number) => {
 export const StationCard = ({ 
   station, 
   lineColor,
+  isMobile,
   onTouchStart,
   onTouchMove,
   onTouchEnd,
@@ -37,7 +39,7 @@ export const StationCard = ({
   const { dangerRank, usageRank } = getStationRanks(station, stationRankData);
 
   return (
-    <Card className="w-full h-full shadow-none border-1 bg-white/60 backdrop-blur-sm flex flex-col" style={{ borderColor: lineColor }}>
+    <Card className={`${isMobile ? 'rounded-t-xl' : 'rounded-lg'} w-full h-full shadow-none border-1 bg-white/60 backdrop-blur-sm flex flex-col`} style={{ borderColor: lineColor }}>
       <div 
         className="w-full h-10 flex justify-center items-center touch-none cursor-move"
         onTouchStart={onTouchStart}
@@ -53,11 +55,11 @@ export const StationCard = ({
           <div className="flex gap-2 text-sm">
             <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
               <TriangleAlert size={16} />
-              {dangerRank}/74
+              #{dangerRank} of 74
             </span>
             <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
               <Users size={16} />
-              {usageRank}/74
+              #{usageRank} of 74
             </span>
           </div>
         </div>

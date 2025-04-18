@@ -5,13 +5,14 @@ import type { Station } from './map';
 type DraggableCardProps = {
   station: Station;
   lineColor: string;
+  isMobile: boolean;
 };
 
 const STATION_SELECTOR_HEIGHT = 125;
 const STATION_SELECTOR_WIDTH = 48;
 const MAX_CARD_HEIGHT = '80vh'; // Maximum height of the card
 
-export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
+export const DraggableCard = ({ station, lineColor, isMobile }: DraggableCardProps) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -79,6 +80,7 @@ export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
       <StationCard
         station={station}
         lineColor={lineColor}
+        isMobile={isMobile}
         onMouseDown={handleMouseDown}
       />
     </div>

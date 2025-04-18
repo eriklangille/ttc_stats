@@ -5,9 +5,10 @@ import { useState, useRef } from 'react';
 type MobileStationCardProps = {
   station: Station;
   lineColor: string;
+  isMobile: boolean;
 };
 
-export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps) => {
+export const MobileStationCard = ({ station, lineColor, isMobile }: MobileStationCardProps) => {
   // Height constants
   const MIN_HEIGHT = 12; // Minimum height as percentage of viewport
   const MID_HEIGHT = 40; // Middle height as percentage of viewport
@@ -16,7 +17,6 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
   const SNAP_THRESHOLD_HIGH = 60; // Threshold between MID and MAX heights
   const VELOCITY_THRESHOLD = 0.2; // Threshold for quick flick detection
 
-  const [isOpen, setIsOpen] = useState(true);
   const [height, setHeight] = useState(MID_HEIGHT);
   const startY = useRef(0);
   const startHeight = useRef(0);
@@ -64,21 +64,20 @@ export const MobileStationCard = ({ station, lineColor }: MobileStationCardProps
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <div 
       ref={sheetRef}
-      className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl shadow-lg transition-all duration-300 ease-out overflow-hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 shadow-lg transition-all duration-300 ease-out overflow-hidden"
       style={{ 
         height: `${height}vh`,
-        transform: `translateY(${isOpen ? '0' : '100%'})`
+        transform: `translateY(0)`
       }}
     >
       <div className="h-full flex flex-col">
         <StationCard
           station={station}
           lineColor={lineColor}
+          isMobile={isMobile}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
