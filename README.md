@@ -1,4 +1,8 @@
-# bun-react-tailwind-shadcn-template
+# TTC Stats
+
+A simple web app to view TTC station statistics.
+
+## Development
 
 To install dependencies:
 
@@ -17,5 +21,3 @@ To run for production:
 ```bash
 bun start
 ```
-
-This project was created using `bun init` in bun v1.2.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
