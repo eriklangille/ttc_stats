@@ -8,6 +8,7 @@ type DraggableCardProps = {
 };
 
 const STATION_SELECTOR_HEIGHT = -300;
+const MAX_CARD_HEIGHT = '80vh'; // Maximum height of the card
 
 export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -65,7 +66,9 @@ export const DraggableCard = ({ station, lineColor }: DraggableCardProps) => {
       className="fixed z-50 w-96"
       style={{
         transform: `translate(${position.x}px, ${position.y}px)`,
-        userSelect: 'none'
+        userSelect: 'none',
+        maxHeight: MAX_CARD_HEIGHT,
+        overflow: 'hidden'
       }}
     >
       <StationCard

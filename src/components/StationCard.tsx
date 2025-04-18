@@ -39,7 +39,7 @@ export const StationCard = ({
   return (
     <Card className="w-full h-full shadow-none border-1 bg-white/60 backdrop-blur-sm flex flex-col" style={{ borderColor: lineColor }}>
       <div 
-        className="w-full h-12 flex justify-center items-center touch-none cursor-move"
+        className="w-full h-10 flex justify-center items-center touch-none cursor-move"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -47,7 +47,7 @@ export const StationCard = ({
       >
         <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
       </div>
-      <CardContent className="p-4 flex-1 overflow-y-auto">
+      <CardContent className="px-4 flex-1 overflow-y-auto max-h-[calc(80vh-3rem)]">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-lg font-semibold">{station.name}</h3>
           <div className="flex gap-2 text-sm">
