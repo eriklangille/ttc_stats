@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { getTopIncidentsForStation, getStationDelayLikelihood, getStationRanks } from '../utils/incidents'
 import topIncidents from '../all_stations_top_incidents_by_year.json'
 import stationDelayData from '../station_delay_likelihood_by_hour.json'
-import stationRankData from '../station_ranking.json'
+import stationRankData from '../station_ranking_with_latlon.json'
 import { TriangleAlert, Users } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
@@ -32,7 +32,7 @@ export const StationCard = ({
   onMouseDown
 }: StationCardProps) => {
   if (!station) return null;
-  const incidents = getTopIncidentsForStation(station, topIncidents);
+  const incidents = getTopIncidentsForStation(station, topIncidents, 25);
   const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
   const { dangerRank, usageRank } = getStationRanks(station, stationRankData);
 
@@ -90,7 +90,7 @@ export const StationCard = ({
         </div>
 
         <div className="mt-4">
-          <h4 className="text-sm font-medium mb-2">Top 10 Incidents</h4>
+          <h4 className="text-sm font-medium mb-2">Top 25 Incidents</h4>
           {incidents.length > 0 ? (
             <div className="space-y-2">
               {incidents.map((incident, index) => (

@@ -34,7 +34,7 @@ const LINES = {
       { distance: 165, name: "High Park", line: "Bloor-Danforth" },
       { distance: 193, name: "Keele", line: "Bloor-Danforth" },
       { distance: 221, name: "Dundas West", line: "Bloor-Danforth" },
-      { distance: 249, name: "Landsdowne", line: "Bloor-Danforth" },
+      { distance: 249, name: "Lansdowne", line: "Bloor-Danforth" },
       { distance: 276, name: "Dufferin", line: "Bloor-Danforth" },
       { distance: 305, name: "Ossington", line: "Bloor-Danforth" },
       { distance: 333, name: "Christie", line: "Bloor-Danforth" },
@@ -202,7 +202,6 @@ const Train = ({ line, startDistance, direction: initialDirection, color }: Trai
   const [direction, setDirection] = useState(initialDirection)
 
   const points = useMemo(() => getAbsolutePoints(line.start, line.line), [line])
-  const currentPosition = useMemo(() => getPointAtDistance(points, currentDistance), [points, currentDistance])
   const endDistance = line.stations[line.stations.length - 1].distance
 
   useEffect(() => {
@@ -325,8 +324,6 @@ const Map = ({
 
   const [adjustedTranslateX, setAdjustedTranslateX] = useState(initialTranslateX);
   const [adjustedTranslateY, setAdjustedTranslateY] = useState(initialTranslateY);
-  const [cardPosition, setCardPosition] = useState<{ x: number; y: number } | null>(null);
-  const [selectedLineColor, setSelectedLineColor] = useState<string>('');
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Calculate position based on selected station
@@ -339,7 +336,6 @@ const Map = ({
     if (station) {
       const points = getAbsolutePoints(line.start, line.line);
       const stationPosition = getPointAtDistance(points, station.distance);
-      const lineColor = line.color;
 
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
@@ -356,12 +352,6 @@ const Map = ({
       setIsAnimating(true);
       setAdjustedTranslateX(newTranslateX);
       setAdjustedTranslateY(newTranslateY);
-
-      // Calculate card position
-      const scaledX = stationPosition.x + 0;
-      const scaledY = stationPosition.y - 0;
-      setCardPosition({ x: scaledX, y: scaledY });
-      setSelectedLineColor(lineColor);
 
       // Reset animation state after transition
       setTimeout(() => {
@@ -406,8 +396,6 @@ const Map = ({
           <g key={`${lineName}-stations`}>
             {LINES[lineName as LineName].stations.map((station, index) => {
               const position = getPointAtDistance(points, station.distance)
-              const isUnionStation = station.name === "Union"
-              const isBelowText = isUnionStation || lineName === "Bloor-Danforth" || lineName === "Sheppard"
               return (
                 <g 
                   key={`${lineName}-station-${index}`} 

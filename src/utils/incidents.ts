@@ -121,7 +121,8 @@ export function getStationDelayLikelihood(
 
 export function getTopIncidentsForStation(
   station: Station,
-  incidents: any
+  incidents: any,
+  numIncidents: number = 10
 ): Incident[] {
   const header = incidents[0];
   const yearIndex = header.indexOf("Year");
@@ -152,7 +153,7 @@ export function getTopIncidentsForStation(
     })
     .filter((incident): incident is Incident => incident !== null)
     .sort((a, b) => b.minDelay - a.minDelay)
-    .slice(0, 10);
+    .slice(0, numIncidents);
 
   return stationIncidents;
 }
