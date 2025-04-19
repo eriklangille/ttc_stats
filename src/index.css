@@ -5,8 +5,16 @@
     @apply font-sans;
   }
 
+  html, body {
+    @apply h-full w-full overflow-hidden;
+  }
+
   body {
-    @apply grid place-items-center min-w-[320px] min-h-screen relative m-0 bg-background text-foreground;
+    @apply relative m-0 bg-background text-foreground;
+  }
+
+  #root {
+    @apply h-full w-full;
   }
 }
 

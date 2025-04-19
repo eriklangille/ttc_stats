@@ -356,7 +356,7 @@ type MapProps = {
 const Map = ({
   sizeX = 1000,
   sizeY = 1000,
-  scale = 3,
+  scale: initialScale = 3,
   strokeWidth = 10,
   selectedStation = null,
   isMobile = false,
@@ -370,53 +370,103 @@ const Map = ({
   const midY = sizeY / 2;
   const offsetX = initialPosition.x - midX;
   const offsetY = initialPosition.y - midY;
-  const initialTranslateX = -offsetX * scale;
-  const initialTranslateY = -offsetY * scale;
+  const initialTranslateX = -offsetX * initialScale;
+  const initialTranslateY = -offsetY * initialScale;
 
+  // Animation state
   const [adjustedTranslateX, setAdjustedTranslateX] = useState(initialTranslateX);
   const [adjustedTranslateY, setAdjustedTranslateY] = useState(initialTranslateY);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Replace cooldown state with ref
+  const [scale, setScale] = useState(initialScale);
+  const [lastDistance, setLastDistance] = useState<number | null>(null);
+  const [targetScale, setTargetScale] = useState(initialScale);
+  const [targetTranslateX, setTargetTranslateX] = useState(initialTranslateX);
+  const [targetTranslateY, setTargetTranslateY] = useState(initialTranslateY);
+  const animationFrameRef = useRef<number>(0);
+  const lastAnimationTime = useRef<number>(0);
   const isOnCooldown = useRef(false);
-  const COOLDOWN_DURATION = 900; // 500ms cooldown
+  const COOLDOWN_DURATION = 900;
 
   // Add ref for the map container
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
-  // Calculate position based on selected station
+  // Calculate target position for a given station and scale
+  const calculateTargetPosition = (station: Station, currentScale: number) => {
+    const line = LINES[station.line];
+    const points = getAbsolutePoints(line.start, line.line);
+    const stationPosition = getPointAtDistance(points, station.distance);
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    const midX = sizeX / 2;
+    const midY = sizeY / 2;
+
+    const offsetX = stationPosition.x - midX;
+    const offsetY = stationPosition.y - midY;
+
+    return {
+      translateX: -offsetX * currentScale - (sizeX - viewportWidth) / 2,
+      translateY: -offsetY * currentScale - (sizeY - viewportHeight) / 2
+    };
+  };
+
+  // Update target position when selected station or scale changes
   useEffect(() => {
-    // Skip animation on initial render
     if (!selectedStation) return;
 
-    const line = LINES[selectedStation.line];
-    const station = line.stations.find(s => s.name === selectedStation.name);
-    if (station) {
-      const points = getAbsolutePoints(line.start, line.line);
-      const stationPosition = getPointAtDistance(points, station.distance);
+    const { translateX, translateY } = calculateTargetPosition(selectedStation, targetScale);
+    setTargetTranslateX(translateX);
+    setTargetTranslateY(translateY);
+  }, [selectedStation, targetScale, sizeX, sizeY]);
 
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+  // Combined smooth animation for both scale and position
+  useEffect(() => {
+    if (scale === targetScale && 
+        adjustedTranslateX === targetTranslateX && 
+        adjustedTranslateY === targetTranslateY) return;
 
-      const midX = sizeX / 2;
-      const midY = sizeY / 2;
+    const animate = () => {
+      const now = performance.now();
+      const timeSinceLastChange = now - lastAnimationTime.current;
+      
+      // Only update if enough time has passed (16ms = ~60fps)
+      if (timeSinceLastChange >= 16) {
+        const easing = 0.2; // Increased from 0.1 to 0.3 for faster animation
+        
+        // Calculate new scale
+        const newScale = scale + (targetScale - scale) * easing;
+        
+        // Calculate new position
+        const newTranslateX = adjustedTranslateX + (targetTranslateX - adjustedTranslateX) * easing;
+        const newTranslateY = adjustedTranslateY + (targetTranslateY - adjustedTranslateY) * easing;
+        
+        // If we're very close to the target, just set it directly
+        if (Math.abs(newScale - targetScale) < 0.001 &&
+            Math.abs(newTranslateX - targetTranslateX) < 0.001 &&
+            Math.abs(newTranslateY - targetTranslateY) < 0.001) {
+          setScale(targetScale);
+          setAdjustedTranslateX(targetTranslateX);
+          setAdjustedTranslateY(targetTranslateY);
+        } else {
+          setScale(newScale);
+          setAdjustedTranslateX(newTranslateX);
+          setAdjustedTranslateY(newTranslateY);
+          lastAnimationTime.current = now;
+          animationFrameRef.current = requestAnimationFrame(animate);
+        }
+      } else {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
 
-      const offsetX = stationPosition.x - midX;
-      const offsetY = stationPosition.y - midY;
+    animationFrameRef.current = requestAnimationFrame(animate);
 
-      const newTranslateX = -offsetX * scale - (sizeX - viewportWidth) / 2;
-      const newTranslateY = -offsetY * scale - (sizeY - viewportHeight) / 2;
-
-      setIsAnimating(true);
-      setAdjustedTranslateX(newTranslateX);
-      setAdjustedTranslateY(newTranslateY);
-
-      // Reset animation state after transition
-      setTimeout(() => {
-        setIsAnimating(false);
-      }, 500);
-    }
-  }, [selectedStation, scale, sizeX, sizeY]);
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [targetScale, scale, targetTranslateX, targetTranslateY, adjustedTranslateX, adjustedTranslateY]);
 
   // Add scroll and touch handlers
   const handleScroll = (e: WheelEvent) => {
@@ -446,10 +496,50 @@ const Map = ({
     }
   };
 
+  const handleTouchStart = (e: TouchEvent) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+      setLastDistance(distance);
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (e.touches.length === 2 && lastDistance !== null) {
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+      
+      const scaleChange = distance / lastDistance;
+      const newTargetScale = targetScale * scaleChange;
+      
+      // Limit scale between 1 and 5
+      setTargetScale(Math.min(Math.max(newTargetScale, 1), 5));
+      setLastDistance(distance);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setLastDistance(null);
+  };
+
   useEffect(() => {
     if (selectedStation) {
       if (isMobile) {
-        // TODO: add pinch to zoom
+        const mapContainer = mapContainerRef.current;
+        if (mapContainer) {
+          mapContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+          mapContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+          mapContainer.addEventListener('touchend', handleTouchEnd);
+        }
       } else {
         document.addEventListener('wheel', handleScroll, { passive: false });
       }
@@ -457,12 +547,17 @@ const Map = ({
     
     return () => {
       if (isMobile) {
-        // TODO: add pinch to zoom
+        const mapContainer = mapContainerRef.current;
+        if (mapContainer) {
+          mapContainer.removeEventListener('touchstart', handleTouchStart);
+          mapContainer.removeEventListener('touchmove', handleTouchMove);
+          mapContainer.removeEventListener('touchend', handleTouchEnd);
+        }
       } else {
         document.removeEventListener('wheel', handleScroll);
       }
     };
-  }, [selectedStation, isMobile]);
+  }, [selectedStation, isMobile, lastDistance]);
 
   const lineElements = useMemo(() => 
     Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
@@ -615,7 +710,6 @@ const Map = ({
         top: 0,
         left: 0,
         transform: `translate(${adjustedTranslateX}px, ${adjustedTranslateY}px) scale(${scale})`,
-        transition: isAnimating ? 'transform 0.5s ease-in-out' : 'none',
         backgroundImage: `url(${ttcBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'bottom 0px right -50px',

@@ -25,7 +25,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="h-full w-full relative">
       <div className="fixed top-0 left-0 z-50 w-full sm:w-auto">
         <StationSelector 
           onStationSelect={setSelectedStation} 
@@ -48,7 +48,7 @@ export function App() {
           />
         )
       )}
-      <div className="max-w-7xl mx-auto p-8 text-center">
+      <div className="h-full w-full">
         <Map 
           sizeX={1500} 
           scale={isMobile ? 2.25 : 3} 
@@ -59,8 +59,6 @@ export function App() {
           isMobile={isMobile}
         />
       </div>
-
-      {/* <h1 className="text-5xl font-bold my-4 leading-tight">TTC Subway Delays</h1> */}
     </div>
   );
 }
