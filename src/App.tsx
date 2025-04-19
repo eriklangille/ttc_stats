@@ -38,11 +38,13 @@ export function App() {
           <MobileStationCard
             station={selectedStation}
             lineColor={LINES[selectedStation.line as LineName]?.color}
+            isMobile={isMobile}
           />
         ) : (
           <DraggableCard
             station={selectedStation}
             lineColor={LINES[selectedStation.line as LineName]?.color}
+            isMobile={isMobile}
           />
         )
       )}
@@ -54,6 +56,7 @@ export function App() {
           strokeWidth={2} 
           selectedStation={selectedStation}
           onStationSelect={setSelectedStation}
+          isMobile={isMobile}
         />
       </div>
 

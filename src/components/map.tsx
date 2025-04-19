@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import ttcBg from '../map.svg'
 
 // Types
@@ -25,7 +25,7 @@ const LINES = {
       { dx: 50, dy: -50 }
     ],
     stations: [
-      { distance: 1, name: "Kipling", line: "Bloor-Danforth" },
+      { distance: 1, name: "Kipling", line: "Bloor-Danforth"},
       { distance: 28, name: "Islington", line: "Bloor-Danforth" },
       { distance: 54, name: "Royal York", line: "Bloor-Danforth" },
       { distance: 82, name: "Old Mill", line: "Bloor-Danforth" },
@@ -185,6 +185,55 @@ const getAngleAtDistance = (points: Point[], distance: number): number => {
   return 0
 }
 
+// Add this function after the getAngleAtDistance function
+const findNextStation = (currentStation: Station, direction: 'up' | 'down' | 'left' | 'right'): Station | null => {
+  const line = LINES[currentStation.line];
+  const points = getAbsolutePoints(line.start, line.line);
+  const currentPosition = getPointAtDistance(points, currentStation.distance);
+  
+  // Get all stations from all lines
+  const allStations = Object.entries(LINES).flatMap(([lineName, lineData]) => {
+    const points = getAbsolutePoints(lineData.start, lineData.line);
+    return lineData.stations.map(station => ({
+      ...station,
+      line: lineName as LineName,
+      position: getPointAtDistance(points, station.distance)
+    }));
+  });
+
+  // Filter stations based on direction
+  const filteredStations = allStations.filter(station => {
+    const dx = station.position.x - currentPosition.x;
+    const dy = station.position.y - currentPosition.y;
+    
+    switch (direction) {
+      case 'up':
+        return dy < 0;
+      case 'down':
+        return dy > 0;
+      case 'left':
+        return dx < 0;
+      case 'right':
+        return dx > 0;
+    }
+  });
+
+  if (filteredStations.length === 0) return null;
+
+  // Find the closest station in the filtered direction
+  return filteredStations.reduce((closest, current) => {
+    const closestDist = Math.hypot(
+      closest.position.x - currentPosition.x,
+      closest.position.y - currentPosition.y
+    );
+    const currentDist = Math.hypot(
+      current.position.x - currentPosition.x,
+      current.position.y - currentPosition.y
+    );
+    return currentDist < closestDist ? current : closest;
+  });
+};
+
 // Components
 type TrainProps = {
   line: Line
@@ -300,6 +349,7 @@ type MapProps = {
   scale?: number
   strokeWidth?: number
   selectedStation?: Station | null
+  isMobile?: boolean
   onStationSelect: (station: Station | null) => void
 }
 
@@ -309,6 +359,7 @@ const Map = ({
   scale = 3,
   strokeWidth = 10,
   selectedStation = null,
+  isMobile = false,
   onStationSelect,
 }: MapProps) => {
   // Find initial Sheppard-Yonge station position
@@ -325,6 +376,13 @@ const Map = ({
   const [adjustedTranslateX, setAdjustedTranslateX] = useState(initialTranslateX);
   const [adjustedTranslateY, setAdjustedTranslateY] = useState(initialTranslateY);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Replace cooldown state with ref
+  const isOnCooldown = useRef(false);
+  const COOLDOWN_DURATION = 900; // 500ms cooldown
+
+  // Add ref for the map container
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Calculate position based on selected station
   useEffect(() => {
@@ -359,6 +417,88 @@ const Map = ({
       }, 500);
     }
   }, [selectedStation, scale, sizeX, sizeY]);
+
+  // Add scroll and touch handlers
+  const handleScroll = (e: WheelEvent) => {
+    if (!selectedStation || isOnCooldown.current) return;
+    
+    // Check if the scroll event originated from within the map container
+    const target = e.target as HTMLElement;
+    const mapContainer = mapContainerRef.current;
+    if (!mapContainer || !mapContainer.contains(target)) return;
+    
+    e.preventDefault();
+    
+    // Determine direction based on scroll
+    const direction = Math.abs(e.deltaX) > Math.abs(e.deltaY)
+      ? e.deltaX > 0 ? 'right' : 'left'
+      : e.deltaY > 0 ? 'down' : 'up';
+    
+    const nextStation = findNextStation(selectedStation, direction);
+    if (nextStation) {
+      isOnCooldown.current = true;
+      onStationSelect(nextStation);
+      
+      // Reset cooldown after duration
+      setTimeout(() => {
+        isOnCooldown.current = false;
+      }, COOLDOWN_DURATION);
+    }
+  };
+
+  const handleTouchStart = (e: TouchEvent) => {
+    if (!selectedStation || isOnCooldown.current) return;
+    
+    const touch = e.touches[0];
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      
+      // Only trigger if movement is significant
+      if (Math.abs(dx) < 50 && Math.abs(dy) < 50) return;
+      
+      // Determine direction based on movement
+      const direction = Math.abs(dx) > Math.abs(dy)
+        ? dx > 0 ? 'right' : 'left'
+        : dy > 0 ? 'down' : 'up';
+      
+      const nextStation = findNextStation(selectedStation, direction);
+      if (nextStation) {
+        isOnCooldown.current = true;
+        onStationSelect(nextStation);
+        document.removeEventListener('touchmove', handleTouchMove);
+        
+        // Reset cooldown after duration
+        setTimeout(() => {
+          isOnCooldown.current = false;
+        }, COOLDOWN_DURATION);
+      }
+    };
+    
+    document.addEventListener('touchmove', handleTouchMove, { once: true });
+  };
+
+  useEffect(() => {
+    if (selectedStation) {
+      if (isMobile) {
+        document.addEventListener('touchstart', handleTouchStart);
+      } else {
+        document.addEventListener('wheel', handleScroll, { passive: false });
+      }
+    }
+    
+    return () => {
+      if (isMobile) {
+        document.removeEventListener('touchstart', handleTouchStart);
+      } else {
+        document.removeEventListener('wheel', handleScroll);
+      }
+    };
+  }, [selectedStation, isMobile]);
 
   const lineElements = useMemo(() => 
     Object.entries(LINES).map(([lineName, { color, start, line: relativePoints }]) => {
@@ -505,6 +645,7 @@ const Map = ({
 
   return (
     <div
+      ref={mapContainerRef}
       style={{
         position: 'fixed',
         top: 0,

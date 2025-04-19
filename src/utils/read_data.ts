@@ -8,50 +8,49 @@ export type Incident = {
   minDelay: number;
 };
 
-export function parseStationName(stationName: string): {
+export type StationData = {
+  latitude: number;
+  longitude: number;
   name: string;
   line: string;
-} {
-  // Handle special cases first
-  if (stationName === "SPADINA BD STATION") {
-    return { name: "Spadina", line: "Bloor-Danforth" };
-  }
-  if (stationName === "SPADINA YU STATION") {
-    return { name: "Spadina", line: "Yonge-University" };
-  }
-  if (stationName === "BLOOR-YONGE STATION") {
-    return { name: "Bloor-Yonge", line: "Yonge-University" };
-  }
-  if (stationName === "ST. GEORGE STATION") {
-    return { name: "St. George", line: "Yonge-University" };
-  }
-  if (stationName === "SHEPPARD-YONGE STATION") {
-    return { name: "Sheppard-Yonge", line: "Yonge-University" };
-  }
-  if (stationName === "VAUGHAN MC STATION") {
-    return { name: "Vaughan Metropolitan Centre", line: "Yonge-University" };
-  }
+};
 
-  // Handle general cases
-  const parts = stationName.split(" ");
-  const line = parts[parts.length - 1];
-  const name = parts.slice(0, -1).join(" ").replace(" STATION", "");
+// station_ranking_with_latlon.json
+// ["danger_rank","standard_name","line","Incident_Count","Average_Danger","Combined_Score","Usage","usage_rank","latitude","longitude"]
+// [1,"Bloor-Yonge","Yonge-University",469,2.0511727078891258,235.52558635394456,156643.0,1.0,43.6705465,-79.3856535]
+export function getNearestStations(
+  latitude: number,
+  longitude: number,
+  stationData: any
+): StationData[] {
+  const header = stationData[0];
+  const latitudeIndex = header.indexOf("latitude");
+  const longitudeIndex = header.indexOf("longitude");
+  const nameIndex = header.indexOf("standard_name");
+  const lineIndex = header.indexOf("line");
 
-  return {
-    name,
-    line:
-      line === "BD"
-        ? "Bloor-Danforth"
-        : line === "YU"
-        ? "Yonge-University"
-        : line === "SHP"
-        ? "Sheppard"
-        : line,
-  };
+  const stations = stationData.slice(1).map((station: any) => ({
+    latitude: station[latitudeIndex],
+    longitude: station[longitudeIndex],
+    name: station[nameIndex],
+    line: station[lineIndex],
+  }));
+
+  // Calculate distances and sort by nearest
+  const stationsWithDistances = stations.map((station) => {
+    const latDiff = station.latitude - latitude;
+    const lonDiff = station.longitude - longitude;
+    const distance = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff);
+    return { ...station, distance };
+  });
+
+  return stationsWithDistances
+    .sort((a, b) => a.distance - b.distance)
+    .map(({ distance, ...station }) => station);
 }
 
-// ["danger_rank","standard_name","line","Incident_Count","Average_Danger","Combined_Score","Usage","usage_rank"]
-// [1,"Bloor-Yonge","Yonge-University",469,2.0511727078891258,235.52558635394456,156643.0,1.0]
+// ["danger_rank","standard_name","line","Incident_Count","Average_Danger","Combined_Score","Usage","usage_rank","latitude","longitude"]
+// [1,"Bloor-Yonge","Yonge-University",469,2.0511727078891258,235.52558635394456,156643.0,1.0,43.6705465,-79.3856535]
 export function getStationRanks(
   station: Station,
   rankData: any

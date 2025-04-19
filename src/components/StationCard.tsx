@@ -1,6 +1,6 @@
 import type { Station } from './map'
 import { Card, CardContent } from "@/components/ui/card"
-import { getTopIncidentsForStation, getStationDelayLikelihood, getStationRanks } from '../utils/incidents'
+import { getTopIncidentsForStation, getStationDelayLikelihood, getStationRanks } from '../utils/read_data'
 import topIncidents from '../all_stations_top_incidents_by_year.json'
 import stationDelayData from '../station_delay_likelihood_by_hour.json'
 import stationRankData from '../station_ranking_with_latlon.json'
