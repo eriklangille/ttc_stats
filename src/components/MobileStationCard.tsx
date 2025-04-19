@@ -12,7 +12,7 @@ export const MobileStationCard = ({ station, lineColor, isMobile }: MobileStatio
   // Height constants
   const MIN_HEIGHT = 12; // Minimum height as percentage of viewport
   const MID_HEIGHT = 40; // Middle height as percentage of viewport
-  const MAX_HEIGHT = 80; // Maximum height as percentage of viewport
+  const MAX_HEIGHT = 75; // Maximum height as percentage of viewport
   const SNAP_THRESHOLD = 27.5; // Threshold between MIN and MID heights
   const SNAP_THRESHOLD_HIGH = 60; // Threshold between MID and MAX heights
   const VELOCITY_THRESHOLD = 0.2; // Threshold for quick flick detection

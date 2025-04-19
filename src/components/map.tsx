@@ -446,46 +446,10 @@ const Map = ({
     }
   };
 
-  const handleTouchStart = (e: TouchEvent) => {
-    if (!selectedStation || isOnCooldown.current) return;
-    
-    const touch = e.touches[0];
-    const startX = touch.clientX;
-    const startY = touch.clientY;
-    
-    const handleTouchMove = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-      
-      // Only trigger if movement is significant
-      if (Math.abs(dx) < 50 && Math.abs(dy) < 50) return;
-      
-      // Determine direction based on movement
-      const direction = Math.abs(dx) > Math.abs(dy)
-        ? dx > 0 ? 'right' : 'left'
-        : dy > 0 ? 'down' : 'up';
-      
-      const nextStation = findNextStation(selectedStation, direction);
-      if (nextStation) {
-        isOnCooldown.current = true;
-        onStationSelect(nextStation);
-        document.removeEventListener('touchmove', handleTouchMove);
-        
-        // Reset cooldown after duration
-        setTimeout(() => {
-          isOnCooldown.current = false;
-        }, COOLDOWN_DURATION);
-      }
-    };
-    
-    document.addEventListener('touchmove', handleTouchMove, { once: true });
-  };
-
   useEffect(() => {
     if (selectedStation) {
       if (isMobile) {
-        document.addEventListener('touchstart', handleTouchStart);
+        // TODO: add pinch to zoom
       } else {
         document.addEventListener('wheel', handleScroll, { passive: false });
       }
@@ -493,7 +457,7 @@ const Map = ({
     
     return () => {
       if (isMobile) {
-        document.removeEventListener('touchstart', handleTouchStart);
+        // TODO: add pinch to zoom
       } else {
         document.removeEventListener('wheel', handleScroll);
       }
