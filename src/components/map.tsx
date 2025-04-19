@@ -601,6 +601,15 @@ const Map = ({
                   onClick={() => onStationSelect({ ...station, line: lineName as LineName })}
                   className="cursor-pointer"
                 >
+                  {/* Invisible hitbox circle */}
+                  <circle
+                    cx={position.x}
+                    cy={position.y}
+                    r={strokeWidth * 2.5} // Larger hitbox
+                    fill="transparent"
+                    style={{ pointerEvents: 'all' }}
+                  />
+                  {/* Visual circle */}
                   <circle
                     cx={position.x}
                     cy={position.y}
@@ -635,6 +644,15 @@ const Map = ({
                   onClick={() => onStationSelect({ ...station, line: lineName as LineName })}
                   className="cursor-pointer"
                 >
+                  {/* Invisible hitbox circle */}
+                  <circle
+                    cx={position.x}
+                    cy={position.y}
+                    r={strokeWidth * 2} // Larger hitbox
+                    fill="transparent"
+                    style={{ pointerEvents: 'all' }}
+                  />
+                  {/* Visual circle */}
                   <circle
                     cx={position.x}
                     cy={position.y}
