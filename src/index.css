@@ -26,7 +26,7 @@
 
 body::before {
   content: "";
-  background-color: #BBCB79;
+  background-color: #4E4E4E;
   position: fixed;
   top: 0;
   left: 0;

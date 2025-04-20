@@ -118,7 +118,7 @@ export const ChartCarousel = ({ delayLikelihood, incidents, lineColor, isMobile 
         </div>
       </div>
 
-      <div className="flex justify-center gap-1.5 mt-1">
+      <div className="flex justify-center gap-1.5 mt-0">
         <button
           onClick={() => setActiveChart(0)}
           className={`w-2 h-2 rounded-full cursor-pointer transition-colors ${

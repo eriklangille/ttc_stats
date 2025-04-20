@@ -13,7 +13,7 @@ type Line = {
 }
 
 // Scale / Zoom constraints
-const MIN_SCALE = 2;
+const MIN_SCALE = 1.5;
 const MAX_SCALE = 4;
 
 const LINES = {
