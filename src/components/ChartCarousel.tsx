@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { StationDelayChart } from './StationDelayChart'
 import { StationIncidentChart } from './StationIncidentChart'
+import { StationYearlyDelayChart } from './StationYearlyDelayChart'
 import type { Incident } from '../utils/read_data'
 
 type ChartCarouselProps = {
@@ -32,7 +33,7 @@ export const ChartCarousel = ({ delayLikelihood, incidents, lineColor, isMobile 
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
-    if (isLeftSwipe && activeChart < 1) {
+    if (isLeftSwipe && activeChart < 2) {
       setActiveChart(activeChart + 1)
     }
     if (isRightSwipe && activeChart > 0) {
@@ -60,7 +61,7 @@ export const ChartCarousel = ({ delayLikelihood, incidents, lineColor, isMobile 
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
-    if (isLeftSwipe && activeChart < 1) {
+    if (isLeftSwipe && activeChart < 2) {
       setActiveChart(activeChart + 1)
     }
     if (isRightSwipe && activeChart > 0) {
@@ -84,7 +85,7 @@ export const ChartCarousel = ({ delayLikelihood, incidents, lineColor, isMobile 
   useEffect(() => {
     if (containerRef.current) {
       const scrollWidth = containerRef.current.scrollWidth
-      const itemWidth = scrollWidth / 2
+      const itemWidth = scrollWidth / 3
       containerRef.current.scrollTo({
         left: activeChart * itemWidth,
         behavior: 'smooth'
@@ -112,8 +113,12 @@ export const ChartCarousel = ({ delayLikelihood, incidents, lineColor, isMobile 
             <StationDelayChart delayLikelihood={delayLikelihood} lineColor={lineColor} />
           </div>
           <div className="flex-none w-full">
-            <h4 className="text-sm font-medium mb-2 text-white">Top Incident Types</h4>
+            <h4 className="text-sm font-medium mb-2 text-white">Top Delay Incident Types</h4>
             <StationIncidentChart incidents={incidents} lineColor={lineColor} />
+          </div>
+          <div className="flex-none w-full">
+            <h4 className="text-sm font-medium mb-2 text-white">Average Delay of Top 30 Incidents by Year</h4>
+            <StationYearlyDelayChart incidents={incidents} lineColor={lineColor} />
           </div>
         </div>
       </div>
@@ -136,6 +141,15 @@ export const ChartCarousel = ({ delayLikelihood, incidents, lineColor, isMobile 
               : 'bg-white/30'
           }`}
           aria-label="Show incident types chart"
+        />
+        <button
+          onClick={() => setActiveChart(2)}
+          className={`w-2 h-2 rounded-full cursor-pointer transition-colors ${
+            activeChart === 2 
+              ? 'bg-white' 
+              : 'bg-white/30'
+          }`}
+          aria-label="Show yearly delay chart"
         />
       </div>
     </div>

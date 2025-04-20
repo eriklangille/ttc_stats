@@ -91,10 +91,10 @@ export const StationCard = ({
             isMobile={isMobile}
           />
           <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2 text-white">Top 25 Incidents by Delay</h4>
+            <h4 className="text-sm font-medium mb-2 text-white">Top 30 Incidents by Delay</h4>
             {incidents.length > 0 ? (
               <div className="space-y-2">
-                {incidents.slice(0, 25).map((incident, index) => (
+                {incidents.slice(0, 30).map((incident, index) => (
                   <div key={index} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
                     <div className="flex justify-between">
                       <span className="font-medium text-white">{incident.description}</span>
