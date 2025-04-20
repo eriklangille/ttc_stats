@@ -51,7 +51,7 @@ export const StationCard = ({
           <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
         </div>
       </div>
-      <CardContent className={`p-0 flex flex-col ${!isMobile ? '' : 'h-[calc(100vh-15rem)]'}`}>
+      <CardContent className={`p-0 flex flex-col`}>
         <div className="px-4 py-3" style={{ borderColor: lineColor }}>
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold truncate max-w-[150px]">{station.name}</h3>
@@ -67,7 +67,7 @@ export const StationCard = ({
             </div>
           </div>
         </div>
-        <div className="px-4 flex-1 overflow-y-auto max-h-[calc(80vh-3rem)]">
+        <div className="px-4 flex-1 overflow-y-auto max-h-[calc(70vh-3rem)]">
           <div className="mt-2">
             <h4 className="text-sm font-medium mb-2">Delay Likelihood by Hour</h4>
             <div className="h-48 mb-4">
