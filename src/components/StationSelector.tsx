@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LINES } from './map';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, MapPin } from 'lucide-react';
+import stationRankData from '../station_ranking_with_latlon.json';
 
 type LineName = keyof typeof LINES;
 type Station = { distance: number; name: string; line: LineName };
@@ -61,6 +62,7 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
 
   // Get all stations from all lines
   const allStations = useMemo(() => {
@@ -110,6 +112,73 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
     );
   }, [sortedStations, searchQuery]);
 
+  // Find nearest station based on lat/lon
+  const findNearestStation = (latitude: number, longitude: number): Station | null => {
+    const header = stationRankData[0];
+    const latIndex = header.indexOf("latitude");
+    const lonIndex = header.indexOf("longitude");
+    const nameIndex = header.indexOf("standard_name");
+    const lineIndex = header.indexOf("line");
+
+    let nearestStation: Station | null = null;
+    let minDistance = Infinity;
+
+    stationRankData.slice(1).forEach((stationData) => {
+      const stationLat = Number(stationData[latIndex]);
+      const stationLon = Number(stationData[lonIndex]);
+      const stationName = stationData[nameIndex];
+      const stationLine = stationData[lineIndex];
+
+      // Calculate distance using Haversine formula
+      const R = 6371; // Earth's radius in km
+      const dLat = (stationLat - latitude) * Math.PI / 180;
+      const dLon = (stationLon - longitude) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(latitude * Math.PI / 180) * Math.cos(stationLat * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c;
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        // Find the matching station in allStations to get the distance property
+        const matchingStation = allStations.find(s => 
+          s.name === stationName && s.line === stationLine
+        );
+        if (matchingStation) {
+          nearestStation = matchingStation;
+        }
+      }
+    });
+
+    return nearestStation;
+  };
+
+  const handleLocationClick = () => {
+    setIsLocating(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const nearestStation = findNearestStation(latitude, longitude);
+          if (nearestStation) {
+            onStationSelect(nearestStation);
+            setIsOpen(false);
+          }
+          setIsLocating(false);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setIsLocating(false);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+      setIsLocating(false);
+    }
+  };
+
   // Update parent when station is selected
   const handleStationSelect = (station: Station) => {
     onStationSelect(station);
@@ -150,13 +219,25 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
         {isOpen && (
           <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg max-h-96 overflow-y-auto">
             <div className="sticky top-0 bg-white p-2 border-b">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for a station..."
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for a station..."
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white pr-24"
+                />
+                <button
+                  onClick={handleLocationClick}
+                  disabled={isLocating}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
+                    searchQuery ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}
+                >
+                  <MapPin className="w-3 h-3" />
+                  <span className="text-xs">{isLocating ? "Locating..." : "Current Location"}</span>
+                </button>
+              </div>
             </div>
             {filteredStations.map((station) => (
               <div
