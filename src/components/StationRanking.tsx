@@ -27,8 +27,8 @@ export const StationRanking = ({ rank, type, lineColor, usage }: StationRankingP
   return (
     <div className="relative">
       <span 
-        className="px-2 py-1 rounded-md flex items-center backdrop-blur-sm gap-1 cursor-pointer transition-all border-1 bg-white/80"
-        style={{ borderColor: `${lineColor}` }}
+        className="px-2 py-1 rounded-md text-nowrap flex items-center backdrop-blur-sm gap-1 cursor-pointer transition-all border-0 font-semibold text-black"
+        style={{ backgroundColor: `${lineColor}` }}
         onTouchStart={() => setIsOpen(!isOpen)}
         onTouchEnd={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
@@ -39,19 +39,19 @@ export const StationRanking = ({ rank, type, lineColor, usage }: StationRankingP
       </span>
       <div 
         className={cn(
-          "absolute z-50 w-[285px] p-2 rounded-lg border-1 bg-white/80 backdrop-blur-sm transition-all duration-200",
+          "absolute z-50 w-[285px] text-white p-2 rounded-md border-1 bg-black/60 backdrop-blur-sm transition-all duration-200",
           isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none",
           type === 'usage' ? "-left-[195px]" : "-left-[150px]",
           "top-[calc(100%+8px)]"
         )}
         style={{ borderColor: `${lineColor}` }}
       >
-        <p className="text-sm text-muted-foreground">{getDescription()}</p>
+        <p className="text-sm">{getDescription()}</p>
         {type === 'usage' && usage && (
           <div className="mt-2">
             <p className="text-sm font-medium">Daily Usage</p>
             <p className="text-2xl font-bold">{usage.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">customers per weekday</p>
+            <p className="text-xs">customers per weekday</p>
           </div>
         )}
       </div>

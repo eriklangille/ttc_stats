@@ -39,22 +39,22 @@ export const StationCard = ({
   const { dangerRank, usageRank, usage } = getStationRanks(station, stationRankData);
 
   return (
-    <Card className={`${isMobile ? 'rounded-t-xl' : 'rounded-lg'} w-full h-full shadow-none border-1 bg-white/60 backdrop-blur-sm flex flex-col`} style={{ borderColor: lineColor }}>
+    <Card className={`${isMobile ? 'rounded-t-xl' : 'rounded-lg'} w-full h-full shadow-none border-0 bg-black/60 backdrop-blur-sm flex flex-col`} style={{ borderColor: lineColor }}>
       <div className="flex-none">
         <div 
-          className="w-full h-10 flex justify-center items-center touch-none cursor-move"
+          className="w-full h-10 flex justify-center items-center touch-none cursor-move bg-black rounded-t-lg"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
           onMouseDown={onMouseDown}
         >
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+          <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
         </div>
       </div>
       <CardContent className={`p-0 flex flex-col`}>
-        <div className="px-4 py-3" style={{ borderColor: lineColor }}>
+        <div className="px-4 py-3 bg-black/80" style={{ borderColor: lineColor }}>
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold truncate max-w-[150px]">{station.name}</h3>
+            <h3 className="text-lg font-semibold truncate max-w-[150px] text-white">{station.name}</h3>
             <div className="flex gap-2 text-sm">
               <StationRanking 
                 rank={dangerRank} 
@@ -72,18 +72,18 @@ export const StationCard = ({
         </div>
         <div className="px-4 flex-1 overflow-y-auto max-h-[calc(70vh-3rem)]">
           <div className="mt-2">
-            <h4 className="text-sm font-medium mb-2">Delay Likelihood by Hour</h4>
+            <h4 className="text-sm font-medium mb-2 text-white">Delay Likelihood by Hour</h4>
             <div className="h-48 mb-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={delayLikelihood} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <XAxis 
                     dataKey="hour" 
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'white' }}
                     interval={1}
                     tickFormatter={formatHour}
                   />
                   <YAxis 
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: 'white' }}
                     tickFormatter={(value) => `${value}%`}
                   />
                   <Bar 
@@ -99,23 +99,23 @@ export const StationCard = ({
           </div>
 
           <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2">Top 25 Incidents</h4>
+            <h4 className="text-sm font-medium mb-2 text-white">Top 25 Incidents</h4>
             {incidents.length > 0 ? (
               <div className="space-y-2">
                 {incidents.map((incident, index) => (
                   <div key={index} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
                     <div className="flex justify-between">
-                      <span className="font-medium">{incident.description}</span>
-                      <span className="text-gray-500">{incident.minDelay} min</span>
+                      <span className="font-medium text-white">{incident.description}</span>
+                      <span className="text-gray-300">{incident.minDelay} min</span>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-400">
                       {incident.date} at {incident.time}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">No incident data available</p>
+              <p className="text-sm text-gray-400">No incident data available</p>
             )}
           </div>
         </div>
