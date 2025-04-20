@@ -40,76 +40,81 @@ export const StationCard = ({
 
   return (
     <Card className={`${isMobile ? 'rounded-t-xl' : 'rounded-lg'} w-full h-full shadow-none border-1 bg-white/60 backdrop-blur-sm flex flex-col`} style={{ borderColor: lineColor }}>
-      <div 
-        className="w-full h-10 flex justify-center items-center touch-none cursor-move"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onMouseDown={onMouseDown}
-      >
-        <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+      <div className="flex-none">
+        <div 
+          className="w-full h-10 flex justify-center items-center touch-none cursor-move"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onMouseDown={onMouseDown}
+        >
+          <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+        </div>
       </div>
-      <CardContent className="px-4 flex-1 overflow-y-auto max-h-[calc(80vh-3rem)]">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold">{station.name}</h3>
-          <div className="flex gap-2 text-sm">
-            <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
-              <TriangleAlert size={16} />
-              #{dangerRank} of 74
-            </span>
-            <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
-              <Users size={16} />
-              #{usageRank} of 74
-            </span>
-          </div>
-        </div>
-        
-        <div className="mt-4">
-          <h4 className="text-sm font-medium mb-2">Delay Likelihood by Hour</h4>
-          <div className="h-48 mb-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={delayLikelihood} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                <XAxis 
-                  dataKey="hour" 
-                  tick={{ fontSize: 10 }}
-                  interval={1}
-                  tickFormatter={formatHour}
-                />
-                <YAxis 
-                  tick={{ fontSize: 10 }}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Bar 
-                  dataKey="likelihood" 
-                  fill={lineColor}
-                  radius={[4, 4, 0, 0]}
-                  isAnimationActive={false}
-                  style={{ cursor: 'default' }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="mt-4">
-          <h4 className="text-sm font-medium mb-2">Top 25 Incidents</h4>
-          {incidents.length > 0 ? (
-            <div className="space-y-2">
-              {incidents.map((incident, index) => (
-                <div key={index} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
-                  <div className="flex justify-between">
-                    <span className="font-medium">{incident.description}</span>
-                    <span className="text-gray-500">{incident.minDelay} min</span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {incident.date} at {incident.time}
-                  </div>
-                </div>
-              ))}
+      <CardContent className={`p-0 flex flex-col ${!isMobile ? '' : 'h-[calc(100vh-15rem)]'}`}>
+        <div className="px-4 py-3" style={{ borderColor: lineColor }}>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold truncate max-w-[150px]">{station.name}</h3>
+            <div className="flex gap-2 text-sm">
+              <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
+                <TriangleAlert size={16} />
+                #{dangerRank} of 74
+              </span>
+              <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
+                <Users size={16} />
+                #{usageRank} of 74
+              </span>
             </div>
-          ) : (
-            <p className="text-sm text-gray-500">No incident data available</p>
-          )}
+          </div>
+        </div>
+        <div className="px-4 flex-1 overflow-y-auto max-h-[calc(80vh-3rem)]">
+          <div className="mt-2">
+            <h4 className="text-sm font-medium mb-2">Delay Likelihood by Hour</h4>
+            <div className="h-48 mb-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={delayLikelihood} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                  <XAxis 
+                    dataKey="hour" 
+                    tick={{ fontSize: 10 }}
+                    interval={1}
+                    tickFormatter={formatHour}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Bar 
+                    dataKey="likelihood" 
+                    fill={lineColor}
+                    radius={[4, 4, 0, 0]}
+                    isAnimationActive={false}
+                    style={{ cursor: 'default' }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <h4 className="text-sm font-medium mb-2">Top 25 Incidents</h4>
+            {incidents.length > 0 ? (
+              <div className="space-y-2">
+                {incidents.map((incident, index) => (
+                  <div key={index} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">{incident.description}</span>
+                      <span className="text-gray-500">{incident.minDelay} min</span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {incident.date} at {incident.time}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No incident data available</p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

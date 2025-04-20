@@ -12,7 +12,10 @@ type Line = {
   stations: readonly Station[]
 }
 
-// Constants
+// Scale / Zoom constraints
+const MIN_SCALE = 2;
+const MAX_SCALE = 4;
+
 const LINES = {
   "Bloor-Danforth": {
     color: "#00A859",
@@ -522,7 +525,7 @@ const Map = ({
       const newTargetScale = targetScale * scaleChange;
       
       // Limit scale between 1 and 5
-      setTargetScale(Math.min(Math.max(newTargetScale, 1), 5));
+      setTargetScale(Math.min(Math.max(newTargetScale, MIN_SCALE), MAX_SCALE));
       setLastDistance(distance);
     }
   };

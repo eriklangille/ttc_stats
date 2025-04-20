@@ -56,7 +56,7 @@ export function App() {
       <div className="h-full w-full">
         <Map 
           sizeX={1500} 
-          scale={isMobile ? 2.25 : 3} 
+          scale={isMobile ? 2.75 : 3} 
           sizeY={1000} 
           strokeWidth={2} 
           selectedStation={selectedStation}
