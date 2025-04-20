@@ -5,7 +5,7 @@ import topIncidents from '../all_stations_top_incidents_by_year.json'
 import stationDelayData from '../station_delay_likelihood_by_hour.json'
 import stationRankData from '../station_ranking_with_latlon.json'
 import { StationRanking } from './StationRanking'
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+import { ChartCarousel } from './ChartCarousel'
 
 type StationCardProps = {
   station: Station
@@ -15,13 +15,6 @@ type StationCardProps = {
   onTouchMove?: (e: React.TouchEvent) => void
   onTouchEnd?: () => void
   onMouseDown?: (e: React.MouseEvent) => void
-}
-
-const formatHour = (hour: number) => {
-  if (hour === 0) return '12A';
-  if (hour < 12) return `${hour}A`;
-  if (hour === 12) return '12P';
-  return `${hour - 12}P`;
 }
 
 const formatDate = (dateStr: string, timeStr: string) => {
@@ -53,7 +46,7 @@ export const StationCard = ({
   onMouseDown
 }: StationCardProps) => {
   if (!station) return null;
-  const incidents = getTopIncidentsForStation(station, topIncidents, 25);
+  const incidents = getTopIncidentsForStation(station, topIncidents, 50);
   const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
   const { dangerRank, usageRank, usage } = getStationRanks(station, stationRankData);
 
@@ -90,38 +83,18 @@ export const StationCard = ({
           </div>
         </div>
         <div className="px-4 flex-1 overflow-y-auto max-h-[calc(70vh-3rem)]">
-          <div className="mt-2">
-            <h4 className="text-sm font-medium mb-2 text-white">Delay Likelihood by Hour</h4>
-            <div className="h-48 mb-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={delayLikelihood} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-                  <XAxis 
-                    dataKey="hour" 
-                    tick={{ fontSize: 10, fill: 'white' }}
-                    interval={1}
-                    tickFormatter={formatHour}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 10, fill: 'white' }}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Bar 
-                    dataKey="likelihood" 
-                    fill={lineColor}
-                    radius={[4, 4, 0, 0]}
-                    isAnimationActive={false}
-                    style={{ cursor: 'default' }}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
+          <div className="mb-4"/>
+          <ChartCarousel 
+            delayLikelihood={delayLikelihood}
+            incidents={incidents}
+            lineColor={lineColor}
+            isMobile={isMobile}
+          />
           <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2 text-white">Top 25 Incidents</h4>
+            <h4 className="text-sm font-medium mb-2 text-white">Top 25 Incidents by Delay</h4>
             {incidents.length > 0 ? (
               <div className="space-y-2">
-                {incidents.map((incident, index) => (
+                {incidents.slice(0, 25).map((incident, index) => (
                   <div key={index} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
                     <div className="flex justify-between">
                       <span className="font-medium text-white">{incident.description}</span>
