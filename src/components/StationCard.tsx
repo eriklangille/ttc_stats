@@ -4,7 +4,7 @@ import { getTopIncidentsForStation, getStationDelayLikelihood, getStationRanks }
 import topIncidents from '../all_stations_top_incidents_by_year.json'
 import stationDelayData from '../station_delay_likelihood_by_hour.json'
 import stationRankData from '../station_ranking_with_latlon.json'
-import { TriangleAlert, Users } from 'lucide-react'
+import { StationRanking } from './StationRanking'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 
 type StationCardProps = {
@@ -36,7 +36,7 @@ export const StationCard = ({
   if (!station) return null;
   const incidents = getTopIncidentsForStation(station, topIncidents, 25);
   const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
-  const { dangerRank, usageRank } = getStationRanks(station, stationRankData);
+  const { dangerRank, usageRank, usage } = getStationRanks(station, stationRankData);
 
   return (
     <Card className={`${isMobile ? 'rounded-t-xl' : 'rounded-lg'} w-full h-full shadow-none border-1 bg-white/60 backdrop-blur-sm flex flex-col`} style={{ borderColor: lineColor }}>
@@ -56,14 +56,17 @@ export const StationCard = ({
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-semibold truncate max-w-[150px]">{station.name}</h3>
             <div className="flex gap-2 text-sm">
-              <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
-                <TriangleAlert size={16} />
-                #{dangerRank} of 74
-              </span>
-              <span className="px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${lineColor}20` }}>
-                <Users size={16} />
-                #{usageRank} of 74
-              </span>
+              <StationRanking 
+                rank={dangerRank} 
+                type="danger" 
+                lineColor={lineColor} 
+              />
+              <StationRanking 
+                rank={usageRank} 
+                type="usage" 
+                lineColor={lineColor}
+                usage={usage}
+              />
             </div>
           </div>
         </div>

@@ -252,7 +252,7 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
                 <button
                   onClick={handleLocationClick}
                   disabled={isLocating}
-                  className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
+                  className={`absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
                     searchQuery ? 'opacity-0 pointer-events-none' : 'opacity-100'
                   }`}
                 >

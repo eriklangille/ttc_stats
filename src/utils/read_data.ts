@@ -57,12 +57,14 @@ export function getStationRanks(
 ): {
   dangerRank: number;
   usageRank: number;
+  usage: number;
 } {
   const header = rankData[0];
   const stationIndex = header.indexOf("standard_name");
   const lineIndex = header.indexOf("line");
   const dangerRankIndex = header.indexOf("danger_rank");
   const usageRankIndex = header.indexOf("usage_rank");
+  const usageIndex = header.indexOf("Usage");
 
   const stationRank = rankData.slice(1).find((line) => {
     const stationName = line[stationIndex];
@@ -74,12 +76,14 @@ export function getStationRanks(
     return {
       dangerRank: 0,
       usageRank: 0,
+      usage: 0,
     };
   }
 
   return {
     dangerRank: stationRank[dangerRankIndex],
     usageRank: stationRank[usageRankIndex],
+    usage: Number(stationRank[usageIndex]),
   };
 }
 
