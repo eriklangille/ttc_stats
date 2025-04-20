@@ -169,13 +169,35 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
           setIsLocating(false);
         },
         (error) => {
-          console.error("Error getting location:", error);
           setIsLocating(false);
+          let errorMessage = "Error getting location";
+          
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "Location access was denied. Please enable location services in your browser settings.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Location information is unavailable. Please check your device settings.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "Location request timed out. Please try again.";
+              break;
+            default:
+              errorMessage = "An unknown error occurred while getting your location.";
+          }
+          
+          // Show error message to user
+          alert(errorMessage);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     } else {
-      console.error("Geolocation is not supported by this browser.");
       setIsLocating(false);
+      alert("Geolocation is not supported by your browser. Please try a different browser or device.");
     }
   };
 
