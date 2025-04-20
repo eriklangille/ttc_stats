@@ -10,7 +10,11 @@ import { LINES } from "./components/map";
 type LineName = keyof typeof LINES;
 
 export function App() {
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+  const [selectedStation, setSelectedStation] = useState<Station>({
+    name: "Bloor-Yonge",
+    line: "Yonge-University",
+    distance: 361
+  });
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
