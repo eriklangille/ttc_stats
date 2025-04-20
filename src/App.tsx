@@ -35,6 +35,7 @@ export function App() {
           onStationSelect={setSelectedStation} 
           selectedStation={selectedStation}
           lineColor={LINES[selectedStation?.line as LineName ?? "Bloor-Danforth"]?.color}
+          isMobile={isMobile}
         />
       </div>
       {selectedStation && (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LINES } from './map';
+import { ChevronDown } from 'lucide-react';
 
 type LineName = keyof typeof LINES;
 type Station = { distance: number; name: string; line: LineName };
@@ -15,8 +16,9 @@ const StationIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-export const StationSelector = ({ onStationSelect, selectedStation, lineColor }: { 
+export const StationSelector = ({ onStationSelect, selectedStation, lineColor, isMobile }: { 
   onStationSelect: (station: Station) => void;
+  isMobile: boolean;
   selectedStation: Station | null;
   lineColor: string;
 }) => {
@@ -57,13 +59,8 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor }:
     return points[points.length - 1];
   };
 
-  const [searchQuery, setSearchQuery] = useState(selectedStation?.name || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-
-  // Update search query when selected station changes
-  useEffect(() => {
-    setSearchQuery(selectedStation?.name || '');
-  }, [selectedStation]);
 
   // Get all stations from all lines
   const allStations = useMemo(() => {
@@ -80,22 +77,27 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor }:
   const sortedStations = useMemo(() => {
     if (!selectedStation) return allStations;
 
-    return [...allStations].sort((a, b) => {
-      const lineA = LINES[a.line];
-      const lineB = LINES[b.line];
-      const pointsA = getAbsolutePoints(lineA.start, lineA.line);
-      const pointsB = getAbsolutePoints(lineB.start, lineB.line);
-      const currentPoints = getAbsolutePoints(LINES[selectedStation.line].start, LINES[selectedStation.line].line);
-      
-      const posA = getPointAtDistance(pointsA, a.distance);
-      const posB = getPointAtDistance(pointsB, b.distance);
-      const currentPos = getPointAtDistance(currentPoints, selectedStation.distance);
-      
-      const distA = Math.hypot(posA.x - currentPos.x, posA.y - currentPos.y);
-      const distB = Math.hypot(posB.x - currentPos.x, posB.y - currentPos.y);
-      
-      return distA - distB;
-    });
+    return [...allStations]
+      .filter(station => 
+        !(station.name === selectedStation.name && 
+          station.line === selectedStation.line)
+      )
+      .sort((a, b) => {
+        const lineA = LINES[a.line];
+        const lineB = LINES[b.line];
+        const pointsA = getAbsolutePoints(lineA.start, lineA.line);
+        const pointsB = getAbsolutePoints(lineB.start, lineB.line);
+        const currentPoints = getAbsolutePoints(LINES[selectedStation.line].start, LINES[selectedStation.line].line);
+        
+        const posA = getPointAtDistance(pointsA, a.distance);
+        const posB = getPointAtDistance(pointsB, b.distance);
+        const currentPos = getPointAtDistance(currentPoints, selectedStation.distance);
+        
+        const distA = Math.hypot(posA.x - currentPos.x, posA.y - currentPos.y);
+        const distB = Math.hypot(posB.x - currentPos.x, posB.y - currentPos.y);
+        
+        return distA - distB;
+      });
   }, [allStations, selectedStation]);
 
   // Filter stations based on search query
@@ -112,24 +114,50 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor }:
   const handleStationSelect = (station: Station) => {
     onStationSelect(station);
     setIsOpen(false);
+    setSearchQuery(''); // Clear search when selecting a station
   };
 
   return (
     <div
-      className={`flex flex-col w-full sm:m-4 gap-4 border-1 items-center bg-white/60 backdrop-blur-sm p-4 rounded-lg shadow-lg`}
+      className={`flex flex-col ${isMobile ? 'w-full' : 'w-96'} sm:m-4 gap-4 border-1 items-center bg-white/60 backdrop-blur-sm p-4 rounded-lg shadow-lg`}
       style={{ borderColor: lineColor }}
     >
       <div className="relative w-full">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsOpen(true)}
-          placeholder="Search for a station..."
-          className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white"
-        />
+        <div
+          onClick={() => {
+            setIsOpen(!isOpen);
+            if (!isOpen) {
+              setSearchQuery(''); // Clear search when opening dropdown
+            }
+          }}
+          className="flex items-center justify-between w-full px-4 py-2 rounded-lg border border-gray-300 bg-white cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            {selectedStation ? (
+              <>
+                <StationIcon color={LINES[selectedStation.line].color} />
+                <div>
+                  <div className="font-medium">{selectedStation.name}</div>
+                  <div className="text-sm text-gray-500">{selectedStation.line}</div>
+                </div>
+              </>
+            ) : (
+              <div className="text-gray-500">Select a station</div>
+            )}
+          </div>
+          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
         {isOpen && (
           <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg max-h-96 overflow-y-auto">
+            <div className="sticky top-0 bg-white p-2 border-b">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for a station..."
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white"
+              />
+            </div>
             {filteredStations.map((station) => (
               <div
                 key={`${station.line}-${station.name}`}

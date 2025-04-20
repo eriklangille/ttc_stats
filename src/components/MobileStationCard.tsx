@@ -67,7 +67,7 @@ export const MobileStationCard = ({ station, lineColor, isMobile }: MobileStatio
   return (
     <div 
       ref={sheetRef}
-      className="fixed bottom-0 left-0 right-0 z-50 shadow-lg transition-all duration-300 ease-out overflow-hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 shadow-lg transition-all duration-300 ease-out overflow-hidden"
       style={{ 
         height: `${height}vh`,
         transform: `translateY(0)`
