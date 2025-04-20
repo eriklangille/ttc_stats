@@ -24,6 +24,25 @@ const formatHour = (hour: number) => {
   return `${hour - 12}P`;
 }
 
+const formatDate = (dateStr: string, timeStr: string) => {
+  const date = new Date(dateStr);
+  const time = new Date(`2000-01-01T${timeStr}`);
+  
+  const month = date.toLocaleString('default', { month: 'long' });
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const hours = time.getHours();
+  const minutes = time.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  const formattedHours = hours % 12 || 12;
+  
+  const daySuffix = (day % 10 === 1 && day !== 11) ? 'st' :
+                   (day % 10 === 2 && day !== 12) ? 'nd' :
+                   (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+  
+  return `${month} ${day}${daySuffix}, ${year} at ${formattedHours}:${minutes} ${ampm}`;
+}
+
 export const StationCard = ({ 
   station, 
   lineColor,
@@ -108,8 +127,8 @@ export const StationCard = ({
                       <span className="font-medium text-white">{incident.description}</span>
                       <span className="text-gray-300">{incident.minDelay} min</span>
                     </div>
-                    <div className="text-xs text-gray-400">
-                      {incident.date} at {incident.time}
+                    <div className="text-xs text-gray-300">
+                      {formatDate(incident.date, incident.time)}
                     </div>
                   </div>
                 ))}
