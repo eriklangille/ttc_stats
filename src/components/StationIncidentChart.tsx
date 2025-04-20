@@ -1,9 +1,38 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import type { Incident } from '../utils/read_data'
+
+const TOP_INCIDENT_COUNT = 5
 
 type StationIncidentChartProps = {
   incidents: Incident[]
   lineColor: string
+}
+
+const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+  const RADIAN = Math.PI / 180
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+  const x = cx + radius * Math.cos(-midAngle * RADIAN)
+  const y = cy + radius * Math.sin(-midAngle * RADIAN)
+
+  // Calculate end points for the label line
+  const labelRadius = outerRadius + 5
+  const labelX = cx + labelRadius * Math.cos(-midAngle * RADIAN)
+  const labelY = cy + labelRadius * Math.sin(-midAngle * RADIAN)
+
+  return (
+    <g>
+      <text
+        x={labelX}
+        y={labelY}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        fontSize={8}
+      >
+        {`${name} ${(percent * 100).toFixed(0)}%`}
+      </text>
+    </g>
+  )
 }
 
 const getIncidentGroups = (incidents: Incident[], lineColor: string) => {
@@ -19,9 +48,9 @@ const getIncidentGroups = (incidents: Incident[], lineColor: string) => {
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
 
-  // Take top 4 and group the rest as "Other"
-  const topIncidents = sortedIncidents.slice(0, 4)
-  const otherCount = sortedIncidents.slice(4).reduce((sum, incident) => sum + incident.value, 0)
+  // Take top N and group the rest as "Other"
+  const topIncidents = sortedIncidents.slice(0, TOP_INCIDENT_COUNT)
+  const otherCount = sortedIncidents.slice(TOP_INCIDENT_COUNT).reduce((sum, incident) => sum + incident.value, 0)
   
   if (otherCount > 0) {
     topIncidents.push({ name: 'Other', value: otherCount })
@@ -30,7 +59,7 @@ const getIncidentGroups = (incidents: Incident[], lineColor: string) => {
   // Generate shades of the line color
   const baseColor = lineColor
   const colors = topIncidents.map((_, index) => {
-    const opacity = 0.2 + (index * 0.2) // Vary opacity from 0.2 to 1.0
+    const opacity = 0.4 + (index * 0.1) // Vary opacity from 0.2 to 1.0
     return `${baseColor}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`
   })
 
@@ -52,16 +81,20 @@ export const StationIncidentChart = ({ incidents, lineColor }: StationIncidentCh
             cx="50%"
             cy="50%"
             labelLine={false}
-            outerRadius={80}
-            fill="#8884d8"
+            outerRadius={45}
+            fontSize={8}
+            fill={lineColor}
+            animationDuration={0}
+            isAnimationActive={false}
             dataKey="value"
-            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            label={CustomLabel}
+            stroke="transparent"
           >
             {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={colors[index]} />
             ))}
           </Pie>
-          <Tooltip 
+          {/* <Tooltip 
             formatter={(value: number) => [`${value} incidents`, 'Count']}
             contentStyle={{ 
               backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -69,7 +102,8 @@ export const StationIncidentChart = ({ incidents, lineColor }: StationIncidentCh
               borderRadius: '4px',
               color: 'white'
             }}
-          />
+            labelStyle={{ color: '#ffffff' }}
+          /> */}
         </PieChart>
       </ResponsiveContainer>
     </div>
