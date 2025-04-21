@@ -5,6 +5,7 @@ import { StationSelector } from "./components/StationSelector";
 import type { Station } from "./components/map";
 import { DraggableCard } from "./components/DraggableCard";
 import { MobileStationCard } from "./components/MobileStationCard";
+import { DraggableAboutCard } from "./components/DraggableAboutCard";
 import { LINES } from "./components/map";
 
 type LineName = keyof typeof LINES;
@@ -16,6 +17,7 @@ export function App() {
     distance: 361
   });
   const [isMobile, setIsMobile] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -36,6 +38,7 @@ export function App() {
           selectedStation={selectedStation}
           lineColor={LINES[selectedStation?.line as LineName ?? "Bloor-Danforth"]?.color}
           isMobile={isMobile}
+          onAboutClick={() => setShowAbout(true)}
         />
       </div>
       {selectedStation && (
@@ -52,6 +55,13 @@ export function App() {
             isMobile={isMobile}
           />
         )
+      )}
+      {showAbout && (
+        <DraggableAboutCard
+          isMobile={isMobile}
+          onClose={() => setShowAbout(false)}
+          lineColor={LINES[selectedStation?.line as LineName ?? "Bloor-Danforth"]?.color}
+        />
       )}
       <div className="h-full w-full">
         <Map 

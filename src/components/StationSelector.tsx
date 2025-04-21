@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LINES } from './map';
-import { ChevronDown, MapPin } from 'lucide-react';
+import { ChevronDown, MapPin, Info } from 'lucide-react';
 import stationRankData from '../station_ranking_with_latlon.json';
 
 type LineName = keyof typeof LINES;
@@ -17,11 +17,12 @@ const StationIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-export const StationSelector = ({ onStationSelect, selectedStation, lineColor, isMobile }: { 
+export const StationSelector = ({ onStationSelect, selectedStation, lineColor, isMobile, onAboutClick }: { 
   onStationSelect: (station: Station) => void;
   isMobile: boolean;
   selectedStation: Station | null;
   lineColor: string;
+  onAboutClick: () => void;
 }) => {
   // Utility functions from map.tsx
   const getAbsolutePoints = (start: Point, relativePoints: readonly RelativePoint[]): Point[] => {
@@ -213,69 +214,77 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
       className={`flex flex-col ${isMobile ? 'w-full' : 'w-96 rounded-lg'} sm:m-4 gap-4 border-0 items-center bg-black/60 backdrop-blur-sm p-4 shadow-lg`}
       style={{ borderColor: lineColor }}
     >
-      <div className="relative w-full">
-        <div
-          onClick={() => {
-            setIsOpen(!isOpen);
-            if (!isOpen) {
-              setSearchQuery(''); // Clear search when opening dropdown
-            }
-          }}
-          className="flex items-center justify-between w-full px-4 py-2 rounded-lg bg-black/80 cursor-pointer"
+      <div className="relative w-full flex items-center gap-2">
+        <button
+          onClick={onAboutClick}
+          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
         >
-          <div className="flex items-center gap-2">
-            {selectedStation ? (
-              <>
-                <StationIcon color={LINES[selectedStation.line].color} />
-                <div>
-                  <div className="font-medium text-white">{selectedStation.name}</div>
-                  <div className="text-sm text-gray-300">{selectedStation.line}</div>
-                </div>
-              </>
-            ) : (
-              <div className="text-gray-300">Select a station</div>
-            )}
-          </div>
-          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''} text-white`} />
-        </div>
-        {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-black rounded-lg shadow-lg max-h-96 overflow-y-auto">
-            <div className="sticky top-0 bg-black p-2 border-b border-white/20">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for a station..."
-                  className="w-full px-4 py-2 rounded-lg border border-white/20 bg-black/60 text-white placeholder-gray-400 pr-24"
-                />
-                <button
-                  onClick={handleLocationClick}
-                  disabled={isLocating}
-                  className={`absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md border border-white/20 bg-black text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
-                    searchQuery ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                  }`}
-                >
-                  <MapPin className="w-3 h-3" />
-                  <span className="text-xs">{isLocating ? "Locating..." : "Current Location"}</span>
-                </button>
-              </div>
+          <Info className="w-5 h-5 text-white" />
+        </button>
+        <div className="flex-1 relative">
+          <div
+            onClick={() => {
+              setIsOpen(!isOpen);
+              if (!isOpen) {
+                setSearchQuery(''); // Clear search when opening dropdown
+              }
+            }}
+            className="flex items-center justify-between px-4 py-2 rounded-lg bg-black/80 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              {selectedStation ? (
+                <>
+                  <StationIcon color={LINES[selectedStation.line].color} />
+                  <div>
+                    <div className="font-medium text-white">{selectedStation.name}</div>
+                    <div className="text-sm text-gray-300">{selectedStation.line}</div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-gray-300">Select a station</div>
+              )}
             </div>
-            {filteredStations.map((station) => (
-              <div
-                key={`${station.line}-${station.name}`}
-                onClick={() => handleStationSelect(station)}
-                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-900 cursor-pointer"
-              >
-                <StationIcon color={station.lineColor} />
-                <div className="flex-1">
-                  <div className="font-medium text-white">{station.name}</div>
-                  <div className="text-sm text-gray-300">{station.line}</div>
+            <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''} text-white`} />
+          </div>
+          {isOpen && (
+            <div className="absolute z-50 w-full mt-1 bg-black rounded-lg shadow-lg max-h-96 overflow-y-auto">
+              <div className="sticky top-0 bg-black p-2 border-b border-white/20">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search for a station..."
+                    className="w-full px-4 py-2 rounded-lg border border-white/20 bg-black/60 text-white placeholder-gray-400 pr-24"
+                  />
+                  <button
+                    onClick={handleLocationClick}
+                    disabled={isLocating}
+                    className={`absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md border border-white/20 bg-black text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
+                      searchQuery ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                    }`}
+                  >
+                    <MapPin className="w-3 h-3" />
+                    <span className="text-xs">{isLocating ? "Locating..." : "Current Location"}</span>
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+              {filteredStations.map((station) => (
+                <div
+                  key={`${station.line}-${station.name}`}
+                  onClick={() => handleStationSelect(station)}
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-900 cursor-pointer"
+                >
+                  <StationIcon color={station.lineColor} />
+                  <div className="flex-1">
+                    <div className="font-medium text-white">{station.name}</div>
+                    <div className="text-sm text-gray-300">{station.line}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
