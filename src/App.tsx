@@ -38,7 +38,8 @@ export function App() {
           selectedStation={selectedStation}
           lineColor={LINES[selectedStation?.line as LineName ?? "Bloor-Danforth"]?.color}
           isMobile={isMobile}
-          onAboutClick={() => setShowAbout(true)}
+          onAboutClick={() => setShowAbout(!showAbout)}
+          showAbout={showAbout}
         />
       </div>
       {selectedStation && (

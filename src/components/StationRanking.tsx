@@ -30,6 +30,12 @@ export const StationRanking = ({ rank, type, lineColor, usage, incidentCount }: 
       <span 
         className="px-2 py-1 rounded-md text-nowrap flex items-center backdrop-blur-sm gap-1 cursor-pointer transition-all border-0 font-semibold text-black"
         style={{ backgroundColor: `${lineColor}` }}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            setIsOpen(!isOpen);
+          }
+        }}
         onTouchStart={() => setIsOpen(!isOpen)}
         onTouchEnd={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}

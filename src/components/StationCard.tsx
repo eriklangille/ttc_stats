@@ -96,7 +96,7 @@ export const StationCard = ({
             {incidents.length > 0 ? (
               <div className="space-y-2">
                 {incidents.slice(0, 30).map((incident, index) => (
-                  <div key={index} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
+                  <div key={index} tabIndex={0} style={{ borderColor: lineColor }} className="text-sm border-b pb-2">
                     <div className="flex justify-between">
                       <span className="font-medium text-white">{incident.description}</span>
                       <span className="text-gray-300">{incident.minDelay} min</span>

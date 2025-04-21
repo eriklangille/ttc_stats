@@ -17,12 +17,13 @@ const StationIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-export const StationSelector = ({ onStationSelect, selectedStation, lineColor, isMobile, onAboutClick }: { 
+export const StationSelector = ({ onStationSelect, selectedStation, lineColor, isMobile, onAboutClick, showAbout }: { 
   onStationSelect: (station: Station) => void;
   isMobile: boolean;
   selectedStation: Station | null;
   lineColor: string;
   onAboutClick: () => void;
+  showAbout: boolean;
 }) => {
   // Utility functions from map.tsx
   const getAbsolutePoints = (start: Point, relativePoints: readonly RelativePoint[]): Point[] => {
@@ -217,6 +218,15 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
       <div className="relative w-full flex items-center gap-2">
         <div className="flex-1 relative">
           <div
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setIsOpen(!isOpen);
+                if (!isOpen) {
+                  setSearchQuery(''); // Clear search when opening dropdown
+                }
+              }
+            }}
             onClick={() => {
               setIsOpen(!isOpen);
               if (!isOpen) {
@@ -246,13 +256,15 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
                 <div className="relative">
                   <input
                     type="text"
+                    tabIndex={0}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search for a station..."
+                    placeholder="Search..."
                     className="w-full px-4 py-2 rounded-lg border border-white/20 bg-black/60 text-white placeholder-gray-400 pr-24"
                   />
                   <button
                     onClick={handleLocationClick}
+                    tabIndex={0}
                     disabled={isLocating}
                     className={`absolute cursor-pointer right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 rounded-md border border-white/20 bg-black text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
                       searchQuery ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -267,6 +279,12 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
                 <div
                   key={`${station.line}-${station.name}`}
                   onClick={() => handleStationSelect(station)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleStationSelect(station);
+                    }
+                  }}
                   className="flex items-center gap-2 px-4 py-2 hover:bg-gray-900 cursor-pointer"
                 >
                   <StationIcon color={station.lineColor} />
@@ -281,9 +299,14 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
         </div>
         <button
           onClick={onAboutClick}
-          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+          tabIndex={0}
+          className={`p-2 cursor-pointer rounded-lg transition-colors ${
+            showAbout 
+              ? 'bg-white/10 text-white' 
+              : 'hover:bg-white/10 text-white'
+          }`}
         >
-          <Info className="w-5 h-5 text-white" />
+          <Info className="w-5 h-5" />
         </button>
       </div>
     </div>

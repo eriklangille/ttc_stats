@@ -27,15 +27,17 @@ const AboutContent = () => (
   </div>
 );
 
-const Header = ({ onClose }: { onClose: () => void }) => (
+const Header = ({ onClose, isMobile }: { onClose: () => void; isMobile: boolean }) => (
   <div className="w-full h-13 flex justify-between items-center px-4 bg-black">
     <h2 className="text-lg font-semibold text-white">About</h2>
-    <button 
-      onClick={onClose}
-      className="p-2 hover:bg-white/10 rounded-full transition-colors"
-    >
-      <X className="w-5 h-5 text-white" />
-    </button>
+    {isMobile && (
+      <button 
+        onClick={onClose}
+        className="p-2 hover:bg-white/10 rounded-full transition-colors"
+      >
+        <X className="w-5 h-5 text-white" />
+      </button>
+    )}
   </div>
 );
 
@@ -53,7 +55,7 @@ export const AboutCard = ({
       <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
         <div className="h-full w-full flex flex-col">
           <div className="flex-none">
-            <Header onClose={onClose} />
+            <Header onClose={onClose} isMobile={isMobile} />
           </div>
           <div className="flex-1 overflow-y-auto p-4">
             <AboutContent />
@@ -75,7 +77,7 @@ export const AboutCard = ({
         >
           <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
         </div>
-        <Header onClose={onClose} />
+        <Header onClose={onClose} isMobile={isMobile} />
       </div>
       <CardContent className="p-4">
         <AboutContent />
