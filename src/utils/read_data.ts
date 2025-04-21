@@ -166,6 +166,34 @@ export function getTopIncidentsForStation(
   return stationIncidents;
 }
 
+// ttc-subway-delay-monthly-comparison-2019-2024.json
+// [ "Month", "Avg Delay 2019", "Incidents 2019", "Avg Delay 2024", "Incidents 2024" ], [ 1.0, 2.44, 1871.0, 2.81, 2259.0 ],
+export function get20192024ComparisonData(
+  delayData: any,
+  incidentData: any
+): {
+  month: number;
+  avgDelay2019: number;
+  incidents2019: number;
+  avgDelay2024: number;
+  incidents2024: number;
+}[] {
+  const header = delayData[0];
+  const monthIndex = header.indexOf("Month");
+  const avgDelay2019Index = header.indexOf("Avg Delay 2019");
+  const incidents2019Index = header.indexOf("Incidents 2019");
+  const avgDelay2024Index = header.indexOf("Avg Delay 2024");
+  const incidents2024Index = header.indexOf("Incidents 2024");
+
+  return delayData.slice(1).map((line) => ({
+    month: line[monthIndex],
+    avgDelay2019: line[avgDelay2019Index],
+    incidents2019: line[incidents2019Index],
+    avgDelay2024: line[avgDelay2024Index],
+    incidents2024: line[incidents2024Index],
+  }));
+}
+
 export function getCombinedAverageDelayLikelihood(
   delayData: any
 ): { hour: number; likelihood: number }[] {
