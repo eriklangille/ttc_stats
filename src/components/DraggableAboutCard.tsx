@@ -9,16 +9,17 @@ type DraggableAboutCardProps = {
 
 const STATION_SELECTOR_HEIGHT = 125;
 const STATION_SELECTOR_WIDTH = 15;
+const OFFSET = 400;
 const MAX_CARD_HEIGHT = '80vh';
 
 export const DraggableAboutCard = ({ isMobile, onClose, lineColor }: DraggableAboutCardProps) => {
-  const [position, setPosition] = useState({ x: STATION_SELECTOR_WIDTH, y: STATION_SELECTOR_HEIGHT });
+  const [position, setPosition] = useState({ x: STATION_SELECTOR_WIDTH + OFFSET, y: STATION_SELECTOR_HEIGHT });
   const [isDragging, setIsDragging] = useState(false);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [startPos, setStartPos] = useState({ x: OFFSET, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setPosition({ x: STATION_SELECTOR_WIDTH, y: STATION_SELECTOR_HEIGHT });
+    setPosition({ x: STATION_SELECTOR_WIDTH + OFFSET, y: STATION_SELECTOR_HEIGHT });
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {

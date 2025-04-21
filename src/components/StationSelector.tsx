@@ -215,12 +215,6 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
       style={{ borderColor: lineColor }}
     >
       <div className="relative w-full flex items-center gap-2">
-        <button
-          onClick={onAboutClick}
-          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-        >
-          <Info className="w-5 h-5 text-white" />
-        </button>
         <div className="flex-1 relative">
           <div
             onClick={() => {
@@ -285,6 +279,12 @@ export const StationSelector = ({ onStationSelect, selectedStation, lineColor, i
             </div>
           )}
         </div>
+        <button
+          onClick={onAboutClick}
+          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+        >
+          <Info className="w-5 h-5 text-white" />
+        </button>
       </div>
     </div>
   );
