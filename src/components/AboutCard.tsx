@@ -3,7 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import { StationDelayChart } from './StationDelayChart';
 import { StationIncidentChart } from './StationIncidentChart';
+import { StationYearlyDelayChart } from './StationYearlyDelayChart';
 import { getCombinedAverageDelayLikelihood, getCombinedIncidents } from '@/utils/read_data';
+import { useState } from 'react';
 
 type AboutCardProps = {
   isMobile: boolean;
@@ -18,8 +20,12 @@ type AboutCardProps = {
 };
 
 const AboutContent = ({ delayData, incidentData }: { delayData: any; incidentData: any }) => {
+  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
   const combinedDelayLikelihood = getCombinedAverageDelayLikelihood(delayData);
   const combinedIncidents = getCombinedIncidents(incidentData);
+  const filteredIncidents = selectedYear === 'all' 
+    ? combinedIncidents 
+    : combinedIncidents.filter(incident => incident.year === selectedYear);
   
   return (
     <div className="text-white space-y-4">
@@ -28,12 +34,28 @@ const AboutContent = ({ delayData, incidentData }: { delayData: any; incidentDat
         This application allows users to explore station-specific data including delay likelihood, incident history, and usage statistics.
       </p>
       <div>
-        <h3 className="text-lg font-semibold mb-2">Average Delay Likelihood by Hour</h3>
+        <h3 className="text-md font-semibold mb-2">Average Delay Likelihood by Hour</h3>
         <StationDelayChart leftMargin={-15} delayLikelihood={combinedDelayLikelihood} lineColor="white" />
       </div>
       <div>
-        <h3 className="text-lg font-semibold">Top Delay Incident Types</h3>
-        <StationIncidentChart leftMargin={60} incidents={combinedIncidents} topIncidentCount={8} lineColor="#ffffff" />
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-md font-semibold">Top Delay Incident Types</h3>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            className="bg-black/60 text-white border border-white/20 rounded px-2 py-1 text-sm"
+          >
+            <option value="all">All Years</option>
+            <option value={2022}>2022</option>
+            <option value={2023}>2023</option>
+            <option value={2024}>2024</option>
+          </select>
+        </div>
+        <StationIncidentChart leftMargin={60} incidents={filteredIncidents} topIncidentCount={8} lineColor="#ffffff" />
+      </div>
+      <div>
+        <h3 className="text-md font-semibold">Average Delay by Year</h3>
+        <StationYearlyDelayChart incidents={combinedIncidents} lineColor="white" />
       </div>
       <p>
         The data presented in this application is collected from various TTC sources and is updated periodically.
