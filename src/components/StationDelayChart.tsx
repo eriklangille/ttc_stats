@@ -16,7 +16,7 @@ export const StationDelayChart = ({ delayLikelihood, lineColor }: StationDelayCh
   return (
     <div className="h-48 mb-4">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={delayLikelihood} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <BarChart data={delayLikelihood} margin={{ top: 5, right: 0, left: -35, bottom: 5 }}>
           <XAxis 
             dataKey="hour" 
             tick={{ fontSize: 10, fill: 'white' }}

@@ -94,16 +94,6 @@ export const StationIncidentChart = ({ incidents, lineColor }: StationIncidentCh
               <Cell key={`cell-${index}`} fill={colors[index]} />
             ))}
           </Pie>
-          {/* <Tooltip 
-            formatter={(value: number) => [`${value} incidents`, 'Count']}
-            contentStyle={{ 
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              border: 'none',
-              borderRadius: '4px',
-              color: 'white'
-            }}
-            labelStyle={{ color: '#ffffff' }}
-          /> */}
         </PieChart>
       </ResponsiveContainer>
     </div>
