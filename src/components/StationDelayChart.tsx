@@ -13,7 +13,7 @@ const formatHour = (hour: number) => {
   return `${hour - 12}P`;
 }
 
-export const StationDelayChart = ({ delayLikelihood, lineColor, leftMargin = -35 }: StationDelayChartProps) => {
+export const StationDelayChart = ({ delayLikelihood, lineColor, leftMargin = -25 }: StationDelayChartProps) => {
   return (
     <div className="h-48 mb-4">
       <ResponsiveContainer width="100%" height="100%">
@@ -26,7 +26,10 @@ export const StationDelayChart = ({ delayLikelihood, lineColor, leftMargin = -35
           />
           <YAxis 
             tick={{ fontSize: 10, fill: 'white' }}
-            tickFormatter={(value) => `${value}%`}
+            tickFormatter={(value) => {
+              const formatted = value.toFixed(1);
+              return formatted.endsWith('.0') ? `${value}%` : `${formatted}%`;
+            }}
           />
           <Bar 
             dataKey="likelihood" 
