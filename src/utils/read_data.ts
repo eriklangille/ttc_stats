@@ -58,6 +58,7 @@ export function getStationRanks(
   dangerRank: number;
   usageRank: number;
   usage: number;
+  incidentCount: number;
 } {
   const header = rankData[0];
   const stationIndex = header.indexOf("standard_name");
@@ -65,7 +66,7 @@ export function getStationRanks(
   const dangerRankIndex = header.indexOf("danger_rank");
   const usageRankIndex = header.indexOf("usage_rank");
   const usageIndex = header.indexOf("Usage");
-
+  const incidentCountIndex = header.indexOf("Incident_Count");
   const stationRank = rankData.slice(1).find((line) => {
     const stationName = line[stationIndex];
     const lineName = line[lineIndex];
@@ -77,6 +78,7 @@ export function getStationRanks(
       dangerRank: 0,
       usageRank: 0,
       usage: 0,
+      incidentCount: 0,
     };
   }
 
@@ -84,6 +86,7 @@ export function getStationRanks(
     dangerRank: stationRank[dangerRankIndex],
     usageRank: stationRank[usageRankIndex],
     usage: Number(stationRank[usageIndex]),
+    incidentCount: Number(stationRank[incidentCountIndex]),
   };
 }
 

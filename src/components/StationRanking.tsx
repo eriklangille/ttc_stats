@@ -7,9 +7,10 @@ type StationRankingProps = {
   type: 'danger' | 'usage'
   lineColor: string
   usage?: number
+  incidentCount?: number
 }
 
-export const StationRanking = ({ rank, type, lineColor, usage }: StationRankingProps) => {
+export const StationRanking = ({ rank, type, lineColor, usage, incidentCount }: StationRankingProps) => {
   const [isOpen, setIsOpen] = React.useState(false)
 
   const getIcon = () => {
@@ -52,6 +53,13 @@ export const StationRanking = ({ rank, type, lineColor, usage }: StationRankingP
             <p className="text-sm font-medium">Daily Usage</p>
             <p className="text-2xl font-bold">{usage.toLocaleString()}</p>
             <p className="text-xs">customers per weekday</p>
+          </div>
+        )}
+        {type === 'danger' && incidentCount && (
+          <div className="mt-2">
+            <p className="text-sm font-medium">Incident Count</p>
+            <p className="text-2xl font-bold">{incidentCount.toLocaleString()}</p>
+            <p className="text-xs">incidents from 2022 to 2024</p>
           </div>
         )}
       </div>

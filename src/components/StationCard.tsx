@@ -48,7 +48,7 @@ export const StationCard = ({
   if (!station) return null;
   const incidents = getTopIncidentsForStation(station, topIncidents, 50);
   const delayLikelihood = getStationDelayLikelihood(station, stationDelayData);
-  const { dangerRank, usageRank, usage } = getStationRanks(station, stationRankData);
+  const { dangerRank, usageRank, usage, incidentCount } = getStationRanks(station, stationRankData);
 
   return (
     <Card className={`${isMobile ? 'rounded-t-xl' : 'rounded-lg'} w-full h-full shadow-none border-0 bg-black/60 backdrop-blur-sm flex flex-col`} style={{ borderColor: lineColor }}>
@@ -72,6 +72,7 @@ export const StationCard = ({
                 rank={dangerRank} 
                 type="danger" 
                 lineColor={lineColor} 
+                incidentCount={incidentCount}
               />
               <StationRanking 
                 rank={usageRank} 
