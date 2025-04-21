@@ -1,11 +1,11 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import type { Incident } from '../utils/read_data'
 
-const TOP_INCIDENT_COUNT = 5
-
 type StationIncidentChartProps = {
   incidents: Incident[]
   lineColor: string
+  topIncidentCount?: number
+  leftMargin?: number
 }
 
 const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
@@ -35,7 +35,7 @@ const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name
   )
 }
 
-const getIncidentGroups = (incidents: Incident[], lineColor: string) => {
+const getIncidentGroups = (incidents: Incident[], lineColor: string, topIncidentCount: number = 5) => {
   // Count occurrences of each incident type
   const incidentCounts = incidents.reduce((acc, incident) => {
     const key = incident.description || 'Other'
@@ -49,17 +49,20 @@ const getIncidentGroups = (incidents: Incident[], lineColor: string) => {
     .sort((a, b) => b.value - a.value)
 
   // Take top N and group the rest as "Other"
-  const topIncidents = sortedIncidents.slice(0, TOP_INCIDENT_COUNT)
-  const otherCount = sortedIncidents.slice(TOP_INCIDENT_COUNT).reduce((sum, incident) => sum + incident.value, 0)
+  const topIncidents = sortedIncidents.slice(0, topIncidentCount)
+  const otherCount = sortedIncidents.slice(topIncidentCount).reduce((sum, incident) => sum + incident.value, 0)
   
   if (otherCount > 0) {
     topIncidents.push({ name: 'Other', value: otherCount })
   }
 
-  // Generate shades of the line color
+  // Generate shades of the line color with dynamic opacity based on number of incidents
   const baseColor = lineColor
   const colors = topIncidents.map((_, index) => {
-    const opacity = 0.4 + (index * 0.1) // Vary opacity from 0.2 to 1.0
+    // Adjust opacity range based on number of incidents
+    const opacityRange = 0.5 // Maximum opacity difference
+    const opacityStep = opacityRange / (topIncidents.length - 1)
+    const opacity = 0.4 + (index * opacityStep)
     return `${baseColor}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`
   })
 
@@ -69,13 +72,13 @@ const getIncidentGroups = (incidents: Incident[], lineColor: string) => {
   }
 }
 
-export const StationIncidentChart = ({ incidents, lineColor }: StationIncidentChartProps) => {
-  const { data, colors } = getIncidentGroups(incidents, lineColor)
+export const StationIncidentChart = ({ incidents, lineColor, leftMargin = -15, topIncidentCount = 5 }: StationIncidentChartProps) => {
+  const { data, colors } = getIncidentGroups(incidents, lineColor, topIncidentCount)
 
   return (
     <div className="h-48 mb-4">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+          <PieChart margin={{ top: 5, right: 0, left: leftMargin, bottom: 5 }}>
           <Pie
             data={data}
             cx="50%"

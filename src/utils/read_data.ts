@@ -15,6 +15,8 @@ export type StationData = {
   line: string;
 };
 
+export const TOTAL_WEEKDAYS_2022_2024 = 782;
+
 // station_ranking_with_latlon.json
 // ["danger_rank","standard_name","line","Incident_Count","Average_Danger","Combined_Score","Usage","usage_rank","latitude","longitude"]
 // [1,"Bloor-Yonge","Yonge-University",469,2.0511727078891258,235.52558635394456,156643.0,1.0,43.6705465,-79.3856535]
@@ -162,4 +164,50 @@ export function getTopIncidentsForStation(
     .slice(0, numIncidents);
 
   return stationIncidents;
+}
+
+export function getCombinedAverageDelayLikelihood(
+  delayData: any
+): { hour: number; likelihood: number }[] {
+  const header = delayData[0];
+  const hourIndex = header.indexOf("Hour");
+  const likelihoodIndex = header.indexOf("Delay_Likelihood_Percent");
+
+  // Initialize an array to store sums and counts for each hour
+  const hourSums = Array(24).fill(0);
+  const hourCounts = Array(24).fill(0);
+
+  // Sum up the likelihoods for each hour
+  delayData.slice(1).forEach((line) => {
+    const hour = line[hourIndex];
+    const likelihood = line[likelihoodIndex];
+    hourSums[hour] += likelihood;
+    hourCounts[hour]++;
+  });
+
+  // Calculate averages
+  return hourSums.map((sum, hour) => ({
+    hour,
+    likelihood: hourCounts[hour] > 0 ? sum / hourCounts[hour] : 0,
+  }));
+}
+
+export function getCombinedIncidents(incidents: any): Incident[] {
+  const header = incidents[0];
+  const yearIndex = header.indexOf("Year");
+  const dateIndex = header.indexOf("Date");
+  const timeIndex = header.indexOf("Time");
+  const descriptionIndex = header.indexOf("Description");
+  const delayIndex = header.indexOf("Min Delay");
+
+  return incidents
+    .slice(1)
+    .map((line) => ({
+      year: line[yearIndex],
+      date: line[dateIndex],
+      time: line[timeIndex],
+      description: line[descriptionIndex] ?? "Other",
+      minDelay: line[delayIndex],
+    }))
+    .sort((a, b) => b.minDelay - a.minDelay);
 }

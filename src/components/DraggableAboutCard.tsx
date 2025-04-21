@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { AboutCard } from './AboutCard';
+import stationDelayData from '../station_delay_likelihood_by_hour.json';
+import stationIncidentData from '../all_stations_top_incidents_by_year.json';
 
 type DraggableAboutCardProps = {
   isMobile: boolean;
@@ -62,7 +64,7 @@ export const DraggableAboutCard = ({ isMobile, onClose, lineColor }: DraggableAb
   }, [isDragging, startPos]);
 
   if (isMobile) {
-    return <AboutCard isMobile={isMobile} onClose={onClose} lineColor={lineColor} />;
+    return <AboutCard isMobile={isMobile} onClose={onClose} lineColor={lineColor} delayData={stationDelayData} incidentData={stationIncidentData} />;
   }
 
   return (
@@ -77,7 +79,7 @@ export const DraggableAboutCard = ({ isMobile, onClose, lineColor }: DraggableAb
       }}
     >
       <div onMouseDown={handleMouseDown}>
-        <AboutCard isMobile={isMobile} onClose={onClose} lineColor={lineColor} />
+        <AboutCard isMobile={isMobile} onClose={onClose} lineColor={lineColor} delayData={stationDelayData} incidentData={stationIncidentData} />
       </div>
     </div>
   );

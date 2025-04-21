@@ -1,5 +1,9 @@
 import { X } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from '@/lib/utils';
+import { StationDelayChart } from './StationDelayChart';
+import { StationIncidentChart } from './StationIncidentChart';
+import { getCombinedAverageDelayLikelihood, getCombinedIncidents } from '@/utils/read_data';
 
 type AboutCardProps = {
   isMobile: boolean;
@@ -9,26 +13,41 @@ type AboutCardProps = {
   onTouchMove?: (e: React.TouchEvent) => void;
   onTouchEnd?: () => void;
   onMouseDown?: (e: React.MouseEvent) => void;
+  delayData: any;
+  incidentData: any;
 };
 
-const AboutContent = () => (
-  <div className="text-white space-y-4">
-    <p>
-      TTC Stats is a data visualization tool that provides insights into the Toronto Transit Commission's subway system.
-      This application allows users to explore station-specific data including delay likelihood, incident history, and usage statistics.
-    </p>
-    <p>
-      The data presented in this application is collected from various TTC sources and is updated periodically.
-      All visualizations and rankings are based on historical data and are intended to provide general insights into station performance.
-    </p>
-    <p>
-      This is a placeholder description. More detailed information about the data sources and methodology will be added here.
-    </p>
-  </div>
-);
+const AboutContent = ({ delayData, incidentData }: { delayData: any; incidentData: any }) => {
+  const combinedDelayLikelihood = getCombinedAverageDelayLikelihood(delayData);
+  const combinedIncidents = getCombinedIncidents(incidentData);
+  
+  return (
+    <div className="text-white space-y-4">
+      <p>
+        TTC Stats is a data visualization tool that provides insights into the Toronto Transit Commission's subway system.
+        This application allows users to explore station-specific data including delay likelihood, incident history, and usage statistics.
+      </p>
+      <div>
+        <h3 className="text-lg font-semibold mb-2">Average Delay Likelihood by Hour</h3>
+        <StationDelayChart leftMargin={-15} delayLikelihood={combinedDelayLikelihood} lineColor="white" />
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold">Top Delay Incident Types</h3>
+        <StationIncidentChart leftMargin={60} incidents={combinedIncidents} topIncidentCount={8} lineColor="#ffffff" />
+      </div>
+      <p>
+        The data presented in this application is collected from various TTC sources and is updated periodically.
+        All visualizations and rankings are based on historical data and are intended to provide general insights into station performance.
+      </p>
+      <p>
+        This is a placeholder description. More detailed information about the data sources and methodology will be added here.
+      </p>
+    </div>
+  );
+};
 
 const Header = ({ onClose, isMobile }: { onClose: () => void; isMobile: boolean }) => (
-  <div className="w-full h-13 flex justify-between items-center px-4 bg-black">
+  <div className={cn("w-full h-13 flex justify-between items-center px-4 bg-black", isMobile && "mt-4")}>
     <h2 className="text-lg font-semibold text-white">About</h2>
     {isMobile && (
       <button 
@@ -48,17 +67,19 @@ export const AboutCard = ({
   onTouchStart,
   onTouchMove,
   onTouchEnd,
-  onMouseDown
+  onMouseDown,
+  delayData,
+  incidentData
 }: AboutCardProps) => {
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm">
         <div className="h-full w-full flex flex-col">
           <div className="flex-none">
             <Header onClose={onClose} isMobile={isMobile} />
           </div>
           <div className="flex-1 overflow-y-auto p-4">
-            <AboutContent />
+            <AboutContent delayData={delayData} incidentData={incidentData} />
           </div>
         </div>
       </div>
@@ -66,7 +87,7 @@ export const AboutCard = ({
   }
 
   return (
-    <Card className="rounded-lg w-96 shadow-none border-0 bg-black/60 backdrop-blur-sm flex flex-col" style={{ borderColor: lineColor }}>
+    <Card className="rounded-lg w-96 shadow-none border-0 bg-black/60 backdrop-blur-sm flex flex-col max-h-[80vh]" style={{ borderColor: lineColor }}>
       <div className="flex-none">
         <div 
           className="w-full h-10 flex justify-center items-center touch-none cursor-move bg-black rounded-t-lg"
@@ -79,8 +100,8 @@ export const AboutCard = ({
         </div>
         <Header onClose={onClose} isMobile={isMobile} />
       </div>
-      <CardContent className="p-4">
-        <AboutContent />
+      <CardContent className="p-4 overflow-y-auto">
+        <AboutContent delayData={delayData} incidentData={incidentData} />
       </CardContent>
     </Card>
   );

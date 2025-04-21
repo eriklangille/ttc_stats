@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts'
 type StationDelayChartProps = {
   delayLikelihood: { hour: number; likelihood: number }[]
   lineColor: string
+  leftMargin?: number
 }
 
 const formatHour = (hour: number) => {
@@ -12,11 +13,11 @@ const formatHour = (hour: number) => {
   return `${hour - 12}P`;
 }
 
-export const StationDelayChart = ({ delayLikelihood, lineColor }: StationDelayChartProps) => {
+export const StationDelayChart = ({ delayLikelihood, lineColor, leftMargin = -35 }: StationDelayChartProps) => {
   return (
     <div className="h-48 mb-4">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={delayLikelihood} margin={{ top: 5, right: 0, left: -35, bottom: 5 }}>
+        <BarChart data={delayLikelihood} margin={{ top: 5, right: 0, left: leftMargin, bottom: 5 }}>
           <XAxis 
             dataKey="hour" 
             tick={{ fontSize: 10, fill: 'white' }}
