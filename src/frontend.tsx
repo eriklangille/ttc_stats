@@ -8,6 +8,11 @@
 import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { App } from "./App";
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: "https://b039fd3bd86745d59f3454e0cebf4bce@o4509191255097344.ingest.us.sentry.io/4509191256801280"
+});
 
 const elem = document.getElementById("root")!;
 const app = (
