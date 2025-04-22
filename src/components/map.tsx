@@ -173,6 +173,14 @@ const getPointAtDistance = (points: Point[], targetDistance: number): Point => {
   return points[points.length - 1]
 }
 
+const findClosestStationIndex = (stations: readonly Station[], targetDistance: number): number => {
+  return stations.reduce((closestIndex, station, currentIndex) => {
+    const currentDiff = Math.abs(station.distance - targetDistance)
+    const closestDiff = Math.abs(stations[closestIndex].distance - targetDistance)
+    return currentDiff < closestDiff ? currentIndex : closestIndex
+  }, 0)
+}
+
 const getAngleAtDistance = (points: Point[], distance: number): number => {
   let accumulatedDistance = 0
   for (let i = 0; i < points.length - 1; i++) {
@@ -239,22 +247,37 @@ const findNextStation = (currentStation: Station, direction: 'up' | 'down' | 'le
 
 // Components
 type TrainProps = {
+  trainId: string
   line: Line
   startDistance: number
   direction: 'eastbound' | 'westbound'
   color: string
 }
 
-const Train = ({ line, startDistance, direction: initialDirection, color }: TrainProps) => {
+const Train = ({ trainId, line, startDistance, direction: initialDirection, color }: TrainProps) => {
   const [currentDistance, setCurrentDistance] = useState(startDistance)
   const [currentStationIndex, setCurrentStationIndex] = useState(
-    initialDirection === 'eastbound' ? 0 : line.stations.length - 1
+    findClosestStationIndex(line.stations, startDistance)
   )
   const [isPaused, setIsPaused] = useState(false)
   const [direction, setDirection] = useState(initialDirection)
 
+  // // Add diagnostic logging for specific trains
+  // useEffect(() => {
+  //   if (trainId === 'bd-east4' || trainId === 'yu-east7') {
+  //     console.log(`[${trainId}] Paused state changed to:`, isPaused, {
+  //       currentDistance,
+  //       currentStationIndex,
+  //       direction,
+  //       station: line.stations[currentStationIndex]?.name
+  //     })
+  //   }
+  // }, [isPaused, trainId, currentDistance, currentStationIndex, direction, line.stations])
+
   const points = useMemo(() => getAbsolutePoints(line.start, line.line), [line])
   const endDistance = line.stations[line.stations.length - 1].distance
+
+  const OFFSET = 6;
 
   useEffect(() => {
     if (isPaused) return
@@ -264,7 +287,7 @@ const Train = ({ line, startDistance, direction: initialDirection, color }: Trai
         const nextDistance = prev + (direction === 'westbound' ? -1 : 1)
         
         // Handle end of line
-        if (nextDistance >= endDistance && direction === 'eastbound') {
+        if (nextDistance >= endDistance - OFFSET && direction === 'eastbound') {
           setIsPaused(true)
           setTimeout(() => {
             setDirection('westbound')
@@ -274,7 +297,7 @@ const Train = ({ line, startDistance, direction: initialDirection, color }: Trai
           return prev
         }
         
-        if (nextDistance <= 1 && direction === 'westbound') {
+        if (nextDistance <= OFFSET && direction === 'westbound') {
           setIsPaused(true)
           setTimeout(() => {
             setDirection('eastbound')
@@ -693,34 +716,34 @@ const Map = ({
 
   const trainElements = useMemo(() => [
     // Bloor-Danforth trains
-    <Train key="bd-east1" line={LINES["Bloor-Danforth"]} startDistance={1} direction="eastbound" color="#00A859" />,
-    <Train key="bd-east2" line={LINES["Bloor-Danforth"]} startDistance={250} direction="eastbound" color="#00A859" />,
-    <Train key="bd-east3" line={LINES["Bloor-Danforth"]} startDistance={500} direction="eastbound" color="#00A859" />,
-    <Train key="bd-east4" line={LINES["Bloor-Danforth"]} startDistance={750} direction="eastbound" color="#00A859" />,
-    <Train key="bd-west1" line={LINES["Bloor-Danforth"]} startDistance={1000} direction="westbound" color="#00A859" />,
-    <Train key="bd-west2" line={LINES["Bloor-Danforth"]} startDistance={750} direction="westbound" color="#00A859" />,
-    <Train key="bd-west3" line={LINES["Bloor-Danforth"]} startDistance={500} direction="westbound" color="#00A859" />,
-    <Train key="bd-west4" line={LINES["Bloor-Danforth"]} startDistance={250} direction="westbound" color="#00A859" />,
+    <Train key="bd-east1" trainId="bd-east1" line={LINES["Bloor-Danforth"]} startDistance={1} direction="eastbound" color="#00A859" />,
+    <Train key="bd-east2" trainId="bd-east2" line={LINES["Bloor-Danforth"]} startDistance={250} direction="eastbound" color="#00A859" />,
+    <Train key="bd-east3" trainId="bd-east3" line={LINES["Bloor-Danforth"]} startDistance={500} direction="eastbound" color="#00A859" />,
+    <Train key="bd-east4" trainId="bd-east4" line={LINES["Bloor-Danforth"]} startDistance={750} direction="eastbound" color="#00A859" />,
+    <Train key="bd-west1" trainId="bd-west1" line={LINES["Bloor-Danforth"]} startDistance={1000} direction="westbound" color="#00A859" />,
+    <Train key="bd-west2" trainId="bd-west2" line={LINES["Bloor-Danforth"]} startDistance={750} direction="westbound" color="#00A859" />,
+    <Train key="bd-west3" trainId="bd-west3" line={LINES["Bloor-Danforth"]} startDistance={500} direction="westbound" color="#00A859" />,
+    <Train key="bd-west4" trainId="bd-west4" line={LINES["Bloor-Danforth"]} startDistance={250} direction="westbound" color="#00A859" />,
     
     // Yonge-University trains
-    <Train key="yu-east1" line={LINES["Yonge-University"]} startDistance={1} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-east2" line={LINES["Yonge-University"]} startDistance={200} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-east3" line={LINES["Yonge-University"]} startDistance={400} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-east4" line={LINES["Yonge-University"]} startDistance={600} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-east5" line={LINES["Yonge-University"]} startDistance={800} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-east6" line={LINES["Yonge-University"]} startDistance={1000} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-east7" line={LINES["Yonge-University"]} startDistance={1200} direction="eastbound" color="#FFCC29" />,
-    <Train key="yu-west1" line={LINES["Yonge-University"]} startDistance={1350} direction="westbound" color="#FFCC29" />,
-    <Train key="yu-west2" line={LINES["Yonge-University"]} startDistance={1150} direction="westbound" color="#FFCC29" />,
-    <Train key="yu-west3" line={LINES["Yonge-University"]} startDistance={950} direction="westbound" color="#FFCC29" />,
-    <Train key="yu-west4" line={LINES["Yonge-University"]} startDistance={750} direction="westbound" color="#FFCC29" />,
-    <Train key="yu-west5" line={LINES["Yonge-University"]} startDistance={550} direction="westbound" color="#FFCC29" />,
-    <Train key="yu-west6" line={LINES["Yonge-University"]} startDistance={350} direction="westbound" color="#FFCC29" />,
-    <Train key="yu-west7" line={LINES["Yonge-University"]} startDistance={150} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-east1" trainId="yu-east1" line={LINES["Yonge-University"]} startDistance={1} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east2" trainId="yu-east2" line={LINES["Yonge-University"]} startDistance={200} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east3" trainId="yu-east3" line={LINES["Yonge-University"]} startDistance={400} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east4" trainId="yu-east4" line={LINES["Yonge-University"]} startDistance={600} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east5" trainId="yu-east5" line={LINES["Yonge-University"]} startDistance={800} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east6" trainId="yu-east6" line={LINES["Yonge-University"]} startDistance={1000} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-east7" trainId="yu-east7" line={LINES["Yonge-University"]} startDistance={1200} direction="eastbound" color="#FFCC29" />,
+    <Train key="yu-west1" trainId="yu-west1" line={LINES["Yonge-University"]} startDistance={1350} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west2" trainId="yu-west2" line={LINES["Yonge-University"]} startDistance={1150} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west3" trainId="yu-west3" line={LINES["Yonge-University"]} startDistance={950} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west4" trainId="yu-west4" line={LINES["Yonge-University"]} startDistance={750} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west5" trainId="yu-west5" line={LINES["Yonge-University"]} startDistance={550} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west6" trainId="yu-west6" line={LINES["Yonge-University"]} startDistance={350} direction="westbound" color="#FFCC29" />,
+    <Train key="yu-west7" trainId="yu-west7" line={LINES["Yonge-University"]} startDistance={150} direction="westbound" color="#FFCC29" />,
     
-    // Sheppard trains (unchanged)
-    <Train key="shep-east" line={LINES["Sheppard"]} startDistance={1} direction="eastbound" color="#A8518A" />,
-    <Train key="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
+    // Sheppard trains
+    <Train key="shep-east" trainId="shep-east" line={LINES["Sheppard"]} startDistance={1} direction="eastbound" color="#A8518A" />,
+    <Train key="shep-west" trainId="shep-west" line={LINES["Sheppard"]} startDistance={225} direction="westbound" color="#A8518A" />
   ], [])
 
   return (
